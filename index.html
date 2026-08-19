@@ -53,8 +53,6 @@
     header h1 { font-size: 1.3rem; font-weight: 700; transition: color 0.4s; color: var(--tab-color); }
     header p { font-size: 0.8rem; color: var(--text-muted); }
     
-    .swipe-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
-
     /* ============ نوار بالای صفحه (چسبان) ============ */
     .topbar {
       position: sticky; top: 0; z-index: 90;
@@ -110,20 +108,11 @@
     .topbar.scrolled .tabs-top button:not(.active) { flex: 0 0 40px; }
     .topbar.scrolled .tabs-top button.active { flex: 1 1 auto; }
     
-    .dot-indicators { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: 0.3s; }
-    .dot.active { background: var(--tab-color); transform: scale(1.3); }
-
-    .panels-container { position: relative; overflow: hidden; min-height: 400px; }
+    .panels-container { position: relative; min-height: 400px; }
     .panel, .result-box, .card { scroll-margin-top: 84px; }
-    .panel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
+    .panel { animation: panelFade 0.25s ease; }
     .panel.hidden { display: none; }
-    .panel.slide-out-left { transform: translateX(-100%); opacity: 0; }
-    .panel.slide-out-right { transform: translateX(100%); opacity: 0; }
-    .panel.slide-in-left { animation: slideInLeft 0.4s forwards; }
-    .panel.slide-in-right { animation: slideInRight 0.4s forwards; }
-    @keyframes slideInLeft { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideInRight { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes panelFade { from { opacity: 0; } to { opacity: 1; } }
     .theme-btn {
       flex: 0 0 40px; width: 40px; height: 40px; margin-inline-start: 8px;
       border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card);
@@ -352,20 +341,12 @@
     </div>
   </div>
 
-  <div class="container" id="swipeArea">
+  <div class="container">
     <header>
       <div class="logo" id="mainLogo">🚗</div>
       <h1>پلاک‌یاب هوشمند</h1>
       <p>رمزگشایی شناسه‌های عمومی ایران</p>
-      <div class="swipe-hint">👆 برای جابجایی بین تب‌ها بکشید</div>
     </header>
-
-    <div class="dot-indicators">
-      <div class="dot active" id="dotPlate"></div>
-      <div class="dot" id="dotNational"></div>
-      <div class="dot" id="dotMotor"></div>
-      <div class="dot" id="dotOther"></div>
-    </div>
 
     <div class="panels-container" id="panelsContainer">
       <!-- پلاک خودرو -->
@@ -635,17 +616,14 @@
     let currentTab = 'plate';
     const TAB_COLORS = { plate: '#38bdf8', national: '#a78bfa', motor: '#34d399', other: '#fbbf24' };
     const TAB_ICONS = { plate: '🚗', national: '🪪', motor: '🏍️', other: '🔍' };
-    const TABS_ORDER = ['plate', 'national', 'motor', 'other'];
 
-    function switchTab(tab, direction = null) {
-      if (tab === currentTab && !direction) return;
-      
-      const prevTab = currentTab;
+    function switchTab(tab) {
+      if (tab === currentTab) return;
+
       currentTab = tab;
-      
+
       const panels = { plate: 'panelPlate', national: 'panelNational', motor: 'panelMotor', other: 'panelOther' };
       const topTabs = { plate: 'tabPlate', national: 'tabNational', motor: 'tabMotor', other: 'tabOther' };
-      const dots = { plate: 'dotPlate', national: 'dotNational', motor: 'dotMotor', other: 'dotOther' };
 
       // رنگ اختصاصی تب
       const color = TAB_COLORS[tab];
@@ -654,58 +632,18 @@
       document.documentElement.style.setProperty('--map-active', color);
       document.getElementById('mainLogo').textContent = TAB_ICONS[tab];
       document.getElementById('miniLogo').textContent = TAB_ICONS[tab];
-      
-      // مدیریت انیمیشن
+
+      // نمایش پنل مربوطه
       Object.keys(panels).forEach(k => {
-        const el = document.getElementById(panels[k]);
-        el.classList.remove('slide-in-left', 'slide-in-right', 'slide-out-left', 'slide-out-right');
-        
-        if (k === tab) {
-          el.classList.remove('hidden');
-          if (direction === 'next') el.classList.add('slide-in-left');
-          else if (direction === 'prev') el.classList.add('slide-in-right');
-        } else if (k === prevTab && direction) {
-          if (direction === 'next') el.classList.add('slide-out-left');
-          else if (direction === 'prev') el.classList.add('slide-out-right');
-          setTimeout(() => el.classList.add('hidden'), 400);
-        } else {
-          el.classList.add('hidden');
-        }
+        document.getElementById(panels[k]).classList.toggle('hidden', k !== tab);
       });
 
       // بروزرسانی UI ناوبری
       Object.keys(topTabs).forEach(k => document.getElementById(topTabs[k]).classList.toggle('active', k === tab));
-      Object.keys(dots).forEach(k => document.getElementById(dots[k]).classList.toggle('active', k === tab));
 
       try { localStorage.setItem('pelakyab_last_tab', tab); } catch(e){}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    // منطق سوییپ
-    let touchStartX = 0;
-    let touchStartY = 0;
-    document.addEventListener('touchstart', e => {
-      if (e.target.closest('input, select, button, .chip, .prov')) return;
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
-    document.addEventListener('touchend', e => {
-      if (e.target.closest('input, select, button, .chip, .prov')) return;
-      const endX = e.changedTouches[0].screenX;
-      const endY = e.changedTouches[0].screenY;
-      const diffX = endX - touchStartX;
-      const diffY = endY - touchStartY;
-
-      if (Math.abs(diffX) > 70 && Math.abs(diffY) < 60) {
-        const idx = TABS_ORDER.indexOf(currentTab);
-        if (diffX < 0 && idx < TABS_ORDER.length - 1) {
-          switchTab(TABS_ORDER[idx + 1], 'next');
-        } else if (diffX > 0 && idx > 0) {
-          switchTab(TABS_ORDER[idx - 1], 'prev');
-        }
-      }
-    }, { passive: true });
 
     /* ============ پلاک خودرو ============ */
     function hideResult(type) {
