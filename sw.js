@@ -1,4 +1,4 @@
-const CACHE = 'pelakyab-v7';
+const CACHE = 'pelakyab-v8';
 const ASSETS = [
   './',
   './index.html',
