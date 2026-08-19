@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" id="metaTheme" content="#0b1120">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="پلاک‌یاب">
-  <meta name="description" content="تشخیص استان، شهر و نوع پلاک خودرو، موتورسیکلت و کد ملی">
+  <meta name="description" content="تشخیص استان، شهر و نوع پلاک خودرو، موتورسیکلت، کد ملی، کد پستی، کارت بانکی، شبا، موبایل و تلفن ثابت">
   <title>پلاک‌یاب هوشمند</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon-180.png" type="image/png">
@@ -19,17 +19,29 @@
       --bg: #0b1120; --bg-card: #131c31; --bg-input: #1a243a; --border: #2a3655;
       --text: #e2e8f0; --text-muted: #94a3b8; --primary: #38bdf8;
       --success: #34d399; --warning: #fbbf24; --danger: #f87171; --radius: 14px;
+      --nav-bg: rgba(19,28,49,0.92); --glow: rgba(56,189,248,0.25);
+      --map-fill: #1e2b4a; --map-stroke: #0f172a; --map-active: #38bdf8; --map-water: #0f1c3d;
+    }
+    html[data-theme="light"] {
+      --bg: #eef3fa; --bg-card: #ffffff; --bg-input: #f1f5f9; --border: #d7e0ee;
+      --text: #0f172a; --text-muted: #5b6b85; --primary: #0284c7;
+      --success: #059669; --warning: #d97706; --danger: #dc2626;
+      --nav-bg: rgba(255,255,255,0.94); --glow: rgba(2,132,199,0.18);
+      --map-fill: #e3eaf5; --map-stroke: #ffffff; --map-active: #0284c7; --map-water: #c3d6ec;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { color-scheme: dark; }
+    html[data-theme="light"] { color-scheme: light; }
     body {
       font-family: 'Vazirmatn', Tahoma, system-ui, sans-serif;
       background: var(--bg);
-      background-image: radial-gradient(ellipse at 20% 0%, rgba(56,189,248,0.08) 0%, transparent 50%);
-      min-height: 100vh; min-height: 100dvh; padding: 16px 14px 40px;
+      background-image: radial-gradient(ellipse at 20% 0%, var(--glow) 0%, transparent 50%);
+      min-height: 100vh; min-height: 100dvh; padding: 16px 14px 96px;
       color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased;
+      transition: background 0.3s, color 0.3s;
     }
     .container { max-width: 460px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 16px; }
+    header { text-align: center; margin-bottom: 16px; position: relative; }
     .logo {
       width: 56px; height: 56px; background: linear-gradient(135deg,#0ea5e9,#38bdf8);
       border-radius: 16px; display: flex; align-items: center; justify-content: center;
@@ -37,21 +49,18 @@
     }
     header h1 { font-size: 1.3rem; font-weight: 700; }
     header p { font-size: 0.8rem; color: var(--text-muted); }
-
-    .tabs {
-      display: flex; gap: 6px; margin-bottom: 16px;
-      background: var(--bg-card); border-radius: 12px; padding: 5px; border: 1px solid var(--border);
+    .theme-btn {
+      position: absolute; top: 4px; left: 4px; width: 42px; height: 42px;
+      border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text); font-size: 1.15rem; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-family: inherit;
     }
-    .tab {
-      flex: 1; text-align: center; padding: 10px 4px; border-radius: 9px;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; color: var(--text-muted);
-      transition: all 0.2s; border: none; background: transparent; font-family: inherit;
-    }
-    .tab.active { background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: #0f172a; box-shadow: 0 3px 10px rgba(14,165,233,0.3); }
+    .theme-btn:active { transform: scale(0.94); }
 
     .card {
       background: var(--bg-card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+      transition: background 0.3s, border 0.3s;
     }
     .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
     .card-title small { color: var(--text-muted); font-weight: 400; font-size: 0.72rem; }
@@ -61,6 +70,7 @@
       width: 100%; padding: 12px 14px; font-size: 1rem; border: 1.5px solid var(--border);
       border-radius: 10px; background: var(--bg-input); color: var(--text);
       font-family: inherit; direction: rtl; appearance: none;
+      transition: border 0.2s, background 0.3s;
     }
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
@@ -77,6 +87,14 @@
       margin-top: 10px; font-family: inherit; box-shadow: 0 4px 12px rgba(14,165,233,0.3);
     }
     .btn:active { transform: scale(0.98); }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row .btn { flex: 1; }
+    .btn-ghost {
+      flex: 1; margin-top: 10px; padding: 12px; font-size: 0.92rem; font-weight: 600;
+      border: 1.5px dashed var(--border); border-radius: 10px; background: transparent;
+      color: var(--text); cursor: pointer; font-family: inherit; text-align: center; display: block;
+    }
+    .btn-ghost:active { transform: scale(0.98); }
 
     .result-box { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; animation: fadeUp 0.3s ease; }
     .result-box.show { display: block; }
@@ -98,6 +116,7 @@
       font-weight: 700; margin-inline-start: 6px; vertical-align: middle;
       background: #1a243a; border: 1px solid var(--border);
     }
+    html[data-theme="light"] .type-badge { background: #eef2f7; }
     .type-badge.personal { color: #0f172a; background: #f1f5f9; border-color: #cbd5e1; }
     .type-badge.taxi, .type-badge.public, .type-badge.agri { color: #0f172a; background: #fde047; border-color: #eab308; }
     .type-badge.gov, .type-badge.protocol { color: #fff; background: #dc2626; border-color: #991b1b; }
@@ -105,14 +124,15 @@
     .type-badge.military2 { color: #0f172a; background: #d6d3d1; border-color: #a8a29e; }
     .type-badge.diplomatic { color: #fff; background: #6366f1; border-color: #4338ca; }
 
-    .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
     .actions button {
       flex: 1; padding: 9px; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border);
       background: var(--bg-input); color: var(--text); font-family: inherit; cursor: pointer;
     }
     .actions button:active { transform: scale(0.97); }
+    .actions button.pic { flex: 1.4; background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: #0f172a; font-weight: 700; border: none; }
 
-    /* plate diagram */
+    /* ============ دیاگرام پلاک ============ */
     .plate {
       display: flex; direction: ltr; align-items: stretch; gap: 6px;
       background: #fff; border-radius: 8px; padding: 7px 8px; margin: 12px 0;
@@ -139,7 +159,7 @@
     .plate.military2 { background: #d6d3d1; }
     .plate.diplomatic { border: 2px solid #6366f1; }
 
-    /* reverse lookup chips */
+    /* ============ چیپ‌ها ============ */
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .chip {
       background: var(--bg-input); border: 1px solid var(--border); border-radius: 9px;
@@ -148,6 +168,8 @@
     .chip b { color: #7dd3fc; font-size: 1rem; }
     .chip span { color: var(--text-muted); font-size: 0.68rem; }
     .chip:active { transform: scale(0.96); }
+    .chip.active { border-color: var(--primary); background: rgba(56,189,248,0.12); }
+    .chip.active b { color: var(--primary); }
 
     .letter-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
     .letter-cell {
@@ -157,7 +179,7 @@
     .letter-cell b { color: #7dd3fc; }
     .letter-cell span { color: var(--text-muted); font-size: 0.66rem; }
 
-    /* history */
+    /* ============ تاریخچه ============ */
     .hist-empty { font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 8px; }
     .hist-item {
       display: flex; align-items: center; gap: 10px; padding: 9px 6px; cursor: pointer;
@@ -191,6 +213,58 @@
     table.types th { color: var(--text-muted); font-size: 0.76rem; background: var(--bg-input); }
     .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-inline-end: 6px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.2); }
 
+    /* ============ نقشه ایران ============ */
+    .map-slot svg { width: 100%; height: auto; display: block; }
+    .map-slot .water { fill: var(--map-water); stroke: none; }
+    .map-slot .prov {
+      fill: var(--map-fill); stroke: var(--map-stroke); stroke-width: 1.4;
+      cursor: pointer; transition: fill 0.35s;
+    }
+    .map-slot .prov:hover { fill: rgba(56,189,248,0.35); }
+    .map-slot .prov.active { fill: var(--map-active); }
+    html[data-theme="light"] .map-slot .prov:hover { fill: rgba(2,132,199,0.3); }
+    .map-slot .plabel { fill: var(--text-muted); font-size: 15px; font-weight: 600; text-anchor: middle; pointer-events: none; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    .map-slot .prov.active + .plabel { fill: #0f172a; }
+    .map-hint { font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 6px; }
+
+    /* ============ مودال ============ */
+    .modal {
+      position: fixed; inset: 0; background: rgba(2,6,17,0.85); z-index: 100;
+      display: none; align-items: center; justify-content: center; padding: 18px;
+    }
+    .modal.show { display: flex; }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-width: 420px; padding: 16px;
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; }
+    .modal-head button { background: var(--bg-input); border: 1px solid var(--border); color: var(--text); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 0.9rem; }
+    .modal video, .modal canvas { width: 100%; border-radius: 10px; background: #000; max-height: 46vh; }
+    .scan-status { font-size: 0.82rem; color: var(--text-muted); text-align: center; padding: 8px; }
+    .scan-ocr-result {
+      margin-top: 10px; padding: 10px; border: 1px dashed var(--border); border-radius: 10px;
+      font-size: 0.88rem; text-align: center;
+    }
+    .progress-track { height: 6px; background: var(--bg-input); border-radius: 99px; margin-top: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,#0ea5e9,#38bdf8); border-radius: 99px; transition: width 0.2s; }
+
+    /* ============ ناوبری پایین ============ */
+    .bottomnav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      display: flex; padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
+    }
+    .bottomnav button {
+      flex: 1; background: transparent; border: none; color: var(--text-muted); font-family: inherit;
+      font-size: 0.68rem; padding: 5px 2px 3px; border-radius: 10px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .bottomnav button .nav-ico { font-size: 1.25rem; line-height: 1.3; }
+    .bottomnav button.active { color: var(--primary); }
+    .bottomnav button.active .nav-ico { transform: translateY(-1px); }
+    .bottomnav button:active { transform: scale(0.95); }
+
     .hidden { display: none !important; }
     footer { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 24px; opacity: 0.65; line-height: 1.8; }
   </style>
@@ -198,19 +272,14 @@
 <body>
   <div class="container">
     <header>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="تغییر تم">🌙</button>
       <div class="logo">🔍</div>
       <h1>پلاک‌یاب هوشمند</h1>
-      <p>تشخیص استان، شهر، نوع پلاک و کد ملی</p>
+      <p>پلاک، کد ملی، کد پستی، بانک، موبایل و بیشتر</p>
     </header>
 
-    <div class="tabs">
-      <button class="tab active" id="tabPlate" onclick="switchTab('plate')">پلاک خودرو</button>
-      <button class="tab" id="tabNational" onclick="switchTab('national')">کد ملی</button>
-      <button class="tab" id="tabMotor" onclick="switchTab('motor')">موتورسیکلت</button>
-    </div>
-
     <!-- ============ پلاک خودرو ============ -->
-    <div id="panelPlate">
+    <section id="panelPlate">
       <div class="card">
         <label for="mode">حالت ورودی</label>
         <select id="mode" onchange="updateMode()">
@@ -241,7 +310,10 @@
           <label for="fullInput">پلاک کامل</label>
           <input type="text" id="fullInput" placeholder="مثال: ۱۲ ب ۳۴۵ - ۹۱" autocomplete="off">
         </div>
-        <button class="btn" onclick="lookupPlate()">جستجو</button>
+        <div class="btn-row">
+          <button class="btn" onclick="lookupPlate()">جستجو</button>
+          <button class="btn" style="background:linear-gradient(135deg,#16a34a,#4ade80)" onclick="openScanner()">📷 اسکن پلاک</button>
+        </div>
       </div>
 
       <div class="result-box" id="resultBoxPlate">
@@ -255,6 +327,7 @@
           <button onclick="shareResult('plate','whatsapp')">واتساپ</button>
           <button onclick="shareResult('plate','telegram')">تلگرام</button>
           <button onclick="copyResult('plate')">کپی</button>
+          <button class="pic" onclick="shareCardImage('plate')">🖼️ کارت تصویری</button>
         </div>
       </div>
 
@@ -262,6 +335,12 @@
         <div class="card-title">🔄 جستجوی معکوس <small>انتخاب استان و دیدن کدها</small></div>
         <select id="revProvince" onchange="reverseLookup()"><option value="">انتخاب استان…</option></select>
         <div id="revResult"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🗺️ نقشه استان‌ها <small>برای دیدن کدهای هر استان کلیک کن</small></div>
+        <div class="map-slot" id="mapPlate"></div>
+        <p class="map-hint">استان شناسایی‌شده با رنگ آبی مشخص می‌شود</p>
       </div>
 
       <div class="card" id="historyCardPlate">
@@ -284,14 +363,14 @@
         </div>
         <div class="guide-content" id="guideContentTypes"></div>
       </div>
-    </div>
+    </section>
 
     <!-- ============ کد ملی ============ -->
-    <div id="panelNational" class="hidden">
+    <section id="panelNational" class="hidden">
       <div class="card">
         <label for="nationalInput">سه رقم اول کد ملی (یا کل کد ملی)</label>
         <input type="text" id="nationalInput" inputmode="numeric" maxlength="10" placeholder="مثال: ۲۰۸ یا ۲۰۸۱۲۳۴۵۶۷" autocomplete="off">
-        <p class="mode-hint">سه رقم اول کد ملی محل صدور شناسنامه را نشان می‌دهد</p>
+        <p class="mode-hint">سه رقم اول کد ملی محل صدور شناسنامه را نشان می‌دهد · با کد کامل، اعتبارسنجی هم انجام می‌شود</p>
         <button class="btn" onclick="lookupNational()">جستجو</button>
       </div>
 
@@ -299,11 +378,13 @@
         <div class="result-title" id="resultTitleNational"></div>
         <div class="result-detail" id="resultProvinceNational"></div>
         <div class="result-detail" id="resultCityNational"></div>
+        <div class="result-detail" id="resultCheckNational"></div>
         <div class="result-note" id="resultNoteNational"></div>
         <div class="actions">
           <button onclick="shareResult('national','whatsapp')">واتساپ</button>
           <button onclick="shareResult('national','telegram')">تلگرام</button>
           <button onclick="copyResult('national')">کپی</button>
+          <button class="pic" onclick="shareCardImage('national')">🖼️ کارت تصویری</button>
         </div>
       </div>
 
@@ -319,10 +400,10 @@
         </div>
         <div class="guide-content" id="guideContentNational"></div>
       </div>
-    </div>
+    </section>
 
     <!-- ============ موتورسیکلت ============ -->
-    <div id="panelMotor" class="hidden">
+    <section id="panelMotor" class="hidden">
       <div class="card">
         <label for="motorInput">کد سه رقمی پلاک موتور (قسمت بالا)</label>
         <input type="text" id="motorInput" inputmode="numeric" maxlength="3" placeholder="مثال: ۵۸۶" autocomplete="off">
@@ -348,15 +429,93 @@
         </div>
         <div class="guide-content" id="guideContentMotor"></div>
       </div>
-    </div>
+    </section>
+
+    <!-- ============ سایر شناسه‌ها ============ -->
+    <section id="panelOther" class="hidden">
+      <div class="card">
+        <label>نوع شناسه</label>
+        <div class="chips" id="otherModes">
+          <div class="chip active" data-mode="postal" onclick="setOtherMode('postal')"><b>📮</b><span>کد پستی</span></div>
+          <div class="chip" data-mode="card" onclick="setOtherMode('card')"><b>💳</b><span>کارت بانکی</span></div>
+          <div class="chip" data-mode="sheba" onclick="setOtherMode('sheba')"><b>🏦</b><span>شماره شبا</span></div>
+          <div class="chip" data-mode="mobile" onclick="setOtherMode('mobile')"><b>📱</b><span>موبایل</span></div>
+          <div class="chip" data-mode="landline" onclick="setOtherMode('landline')"><b>☎️</b><span>تلفن ثابت</span></div>
+        </div>
+        <label id="otherLabel" style="margin-top:12px">کد پستی ۱۰ رقمی</label>
+        <input type="text" id="otherInput" inputmode="numeric" autocomplete="off" dir="ltr" style="text-align:center; letter-spacing:1px" placeholder="مثلاً 1359663611">
+        <p class="mode-hint" id="otherHint">۵ رقم اول کد پستی محل (شهر و منطقه) را مشخص می‌کند</p>
+        <button class="btn" onclick="lookupOther()">جستجو</button>
+      </div>
+
+      <div class="result-box" id="resultBoxOther">
+        <div class="result-title" id="resultTitleOther"></div>
+        <div class="result-detail" id="resultLine1Other"></div>
+        <div class="result-detail" id="resultLine2Other"></div>
+        <div class="result-detail" id="resultLine3Other"></div>
+        <div class="result-note" id="resultNoteOther"></div>
+        <div class="actions">
+          <button onclick="shareResult('other','whatsapp')">واتساپ</button>
+          <button onclick="shareResult('other','telegram')">تلگرام</button>
+          <button onclick="copyResult('other')">کپی</button>
+          <button class="pic" onclick="shareCardImage('other')">🖼️ کارت تصویری</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🗺️ نقشه استان‌ها</div>
+        <div class="map-slot" id="mapOther"></div>
+      </div>
+
+      <div class="card" id="historyCardOther">
+        <div class="card-title">🕓 تاریخچه اخیر</div>
+        <div id="historyOther"></div>
+      </div>
+
+      <div class="card">
+        <div class="guide-header" onclick="toggleGuide('other')">
+          <h2>📖 راهنمای شناسه‌ها</h2>
+          <span class="guide-toggle" id="guideToggleOther">▼</span>
+        </div>
+        <div class="guide-content" id="guideContentOther"></div>
+      </div>
+    </section>
 
     <footer>
-      داده‌ها تقریبی و بر پایه منابع عمومی (ویکی‌پدیا، ثبت احوال) · نسخه ۲.۰
+      داده‌ها تقریبی و بر پایه منابع عمومی (ویکی‌پدیا، ثبت احوال، مخابرات، شرکت پست) · نسخه ۳.۰<br>
+      🔒 این ابزار فقط کدگذاری‌های عمومی را رمزگشایی می‌کند؛ هیچ اطلاعات هویتی یا مالکیتی را استعلام نمی‌کند.
     </footer>
   </div>
 
+  <!-- ناوبری پایین -->
+  <nav class="bottomnav">
+    <button class="active" id="navPlate" onclick="switchTab('plate')"><span class="nav-ico">🚗</span>پلاک</button>
+    <button id="navNational" onclick="switchTab('national')"><span class="nav-ico">🪪</span>کد ملی</button>
+    <button id="navMotor" onclick="switchTab('motor')"><span class="nav-ico">🏍️</span>موتور</button>
+    <button id="navOther" onclick="switchTab('other')"><span class="nav-ico">🔎</span>شناسه‌ها</button>
+  </nav>
+
+  <!-- مودال اسکن پلاک -->
+  <div class="modal" id="scanModal">
+    <div class="modal-box">
+      <div class="modal-head">📷 اسکن پلاک <button onclick="closeScanner()">✕</button></div>
+      <video id="scanVideo" autoplay playsinline muted></video>
+      <div class="scan-status" id="scanStatus">دوربین در حال آماده‌سازی…</div>
+      <div class="btn-row">
+        <button class="btn" id="scanCaptureBtn" onclick="captureFrame()" style="margin-top:10px">📸 عکس بگیر</button>
+        <label class="btn-ghost">📁 انتخاب عکس
+          <input type="file" id="scanFile" accept="image/*" style="display:none">
+        </label>
+      </div>
+      <div class="progress-track hidden" id="scanProgress"><div class="progress-bar" id="scanBar"></div></div>
+      <div id="scanResultBox"></div>
+    </div>
+  </div>
+
   <script src="data.js"></script>
+  <script src="map.js"></script>
   <script>
+    'use strict';
     /* ============ ابزارهای کمکی ============ */
     function toEn(str) {
       if (!str) return '';
@@ -370,16 +529,37 @@
     }
     const PERSIAN_LETTERS = 'آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی';
 
-    /* ============ تب‌ها ============ */
+    /* ============ تم روشن / تاریک ============ */
+    function applyTheme(t) {
+      document.documentElement.dataset.theme = t;
+      document.getElementById('themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+      document.getElementById('metaTheme').setAttribute('content', t === 'dark' ? '#0b1120' : '#eef3fa');
+      try { localStorage.setItem('pelakyab_theme', t); } catch (e) {}
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    }
+    function initTheme() {
+      let t = null;
+      try { t = localStorage.getItem('pelakyab_theme'); } catch (e) {}
+      if (!t) {
+        t = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+      }
+      applyTheme(t);
+    }
+
+    /* ============ تب‌ها و ناوبری ============ */
     function switchTab(tab) {
-      const panels = { plate: 'panelPlate', national: 'panelNational', motor: 'panelMotor' };
+      const panels = { plate: 'panelPlate', national: 'panelNational', motor: 'panelMotor', other: 'panelOther' };
+      const navs = { plate: 'navPlate', national: 'navNational', motor: 'navMotor', other: 'navOther' };
       Object.keys(panels).forEach(k => document.getElementById(panels[k]).classList.toggle('hidden', k !== tab));
-      ['tabPlate','tabNational','tabMotor'].forEach(id => document.getElementById(id).classList.toggle('active', id === 'tab' + tab[0].toUpperCase() + tab.slice(1)));
+      Object.keys(navs).forEach(k => document.getElementById(navs[k]).classList.toggle('active', k === tab));
+      window.scrollTo({ top: 0 });
     }
 
     /* ============ پلاک خودرو ============ */
     function hideResult(type) {
-      const ids = { plate: 'resultBoxPlate', national: 'resultBoxNational', motor: 'resultBoxMotor' };
+      const ids = { plate: 'resultBoxPlate', national: 'resultBoxNational', motor: 'resultBoxMotor', other: 'resultBoxOther' };
       const el = document.getElementById(ids[type]);
       if (el) el.classList.remove('show');
     }
@@ -415,10 +595,11 @@
     function parseFullPlate(raw) {
       const s = toEn(raw).replace(/[\s\-–_/]/g, '');
       if (!s) return { error: 'ورودی خالی است.' };
-      // فرمت: دو رقم + حرف + سه(یا چهار) رقم + دو رقم
       const m = s.match(/^(\d{2})([A-Za-z\u0600-\u06FF]{1})(\d{3,4})(\d{2})$/);
       if (!m) return { error: 'فرمت پلاک کامل را اشتباه وارد کرده‌اید.\nفرمت درست: ۱۲ ب ۳۴۵ - ۹۱' };
-      return { code: m[1], letter: m[2], mid: m[3], code2: m[4] };
+      let letter = m[2];
+      if (/[a-zA-Z]/.test(letter)) letter = L2P[letter.toLowerCase()] || letter;
+      return { code: m[1], letter: letter, mid: m[3], code2: m[4] };
     }
 
     function lookupPlate() {
@@ -443,7 +624,6 @@
       return [city];
     }
     function citiesProvince(letter, code) {
-      // استان‌های مرتبط با شهر(های) یک حرف
       const cityToProv = CITY_PROV || {};
       const provs = new Set();
       const letters = LETTERS[code];
@@ -472,6 +652,7 @@
         title.textContent = '❌ ورودی نامعتبر';
         provEl.textContent = ''; cityEl.textContent = ''; typeEl.textContent = ''; diagramEl.innerHTML = '';
         noteEl.textContent = opts.error || 'کد دو رقمی معتبر وارد کنید.';
+        highlightProvinces([]);
         return;
       }
 
@@ -482,6 +663,7 @@
         provEl.textContent = `کد ${toFa(code)} یافت نشد.`;
         cityEl.textContent = ''; typeEl.textContent = ''; diagramEl.innerHTML = '';
         noteEl.textContent = 'ممکن است کد جدید یا مربوط به خودروهای خاص باشد.';
+        highlightProvinces([]);
         return;
       }
 
@@ -505,13 +687,11 @@
       const shared = province.includes('/');
       box.className = 'result-box ' + (shared ? 'warning show' : 'success show');
 
-      // نوع پلاک
       let typeTxt = '';
       if (opts.mid !== undefined) {
         const t = plateTypeOf(letter || '', opts.mid.length);
         if (t) typeTxt = `<span class="type-badge ${t.cls}">${t.label}</span>`;
       } else if (letter && letterResolved === false) {
-        // حالت دو رقم + حرف بدون داده حرف
         const t = plateTypeOf(letter, 3);
         if (t) typeTxt = `<span class="type-badge ${t.cls}">${t.label}</span>`;
       }
@@ -527,11 +707,11 @@
       if (letterResolved) extras.push('با حرف، منطقه دقیق‌تر شناسایی شد.');
       noteEl.textContent = extras.join(' · ') || 'بر اساس سیستم پلاک‌گذاری ملی';
 
-      // دیاگرام پلاک
       diagramEl.innerHTML = renderPlate(letter, code, opts);
 
       window._lastPlate = { code, letter, mid: opts.mid, province, cities: cities.join('، '), note: noteEl.textContent, type: typeTxt.replace(/<[^>]+>/g,'') };
       addHistory('plate', { code, letter, province, city: cities.join('، '), query: (letter ? code + ' ' + letter : code) });
+      highlightProvinces(province.split(' / '));
     }
 
     function renderPlate(letter, code, opts) {
@@ -570,8 +750,9 @@
       const sel = document.getElementById('revProvince');
       const box = document.getElementById('revResult');
       const p = sel.value;
-      if (!p) { box.innerHTML = ''; return; }
+      if (!p) { box.innerHTML = ''; highlightProvinces([]); return; }
       const codes = Object.keys(PLATE_DATA).filter(c => PLATE_DATA[c].province === p).sort((a, b) => a - b);
+      highlightProvinces(p.split(' / '));
       if (!codes.length) { box.innerHTML = '<p class="hist-empty">کدی یافت نشد.</p>'; return; }
       let html = '<div class="chips">';
       codes.forEach(c => {
@@ -579,7 +760,6 @@
         html += `<div class="chip" onclick="quickLookup('${c}')"><b>${toFa(c)}</b><span>${cities.join('، ') || '—'}</span></div>`;
       });
       html += '</div>';
-      // جزئیات حروف
       const letterBlocks = [];
       codes.forEach(c => {
         const lm = LETTERS[c];
@@ -597,7 +777,87 @@
       document.getElementById('panelPlate').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    /* ============ نقشه ایران ============ */
+    const PROV_ALIAS = {
+      'تهران / البرز': ['tehran', 'alborz'],
+      'استانهای خراسان': ['khorasanshomali', 'khorasanrazavi', 'khorasanjunubi'],
+      'استان‌های خراسان': ['khorasanshomali', 'khorasanrazavi', 'khorasanjunubi'],
+      'کهگیلویه و بویراحمد': ['kvab'],
+      'کهکیلویه و بویراحمد': ['kvab']
+    };
+    function provKeysFor(fa) {
+      if (PROV_ALIAS[fa]) return PROV_ALIAS[fa];
+      const found = Object.keys(IRAN_FA).filter(k => IRAN_FA[k] === fa);
+      if (found.length) return [found[0]];
+      return [];
+    }
+    function renderMaps() {
+      document.querySelectorAll('.map-slot').forEach(el => {
+        if (el.dataset.ready) return;
+        el.innerHTML = IRAN_MAP_SVG;
+        el.dataset.ready = '1';
+        addMapLabels(el);
+        el.querySelectorAll('.prov').forEach(p => {
+          p.addEventListener('click', () => mapProvinceClick(p.dataset.name));
+        });
+      });
+    }
+    function addMapLabels(el) {
+      el.querySelectorAll('.prov').forEach(p => {
+        if (p.classList.contains('island')) return;
+        const fa = IRAN_FA[p.dataset.name];
+        if (!fa) return;
+        let b = null;
+        try { b = p.getBBox(); } catch (e) {}
+        if (!b || !b.width || b.width * b.height < 1500) return;
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        const fs = Math.max(12, Math.min(22, Math.sqrt(b.width * b.height) / 9));
+        t.setAttribute('x', b.x + b.width / 2);
+        t.setAttribute('y', b.y + b.height / 2 + fs * 0.35);
+        t.setAttribute('class', 'plabel');
+        t.setAttribute('font-size', fs);
+        t.textContent = fa;
+        p.parentNode.appendChild(t);
+      });
+    }
+    function highlightProvinces(list) {
+      document.querySelectorAll('.map-slot .prov').forEach(p => p.classList.remove('active'));
+      if (!list || !list.length) return;
+      const keys = new Set();
+      list.forEach(fa => provKeysFor(fa).forEach(k => keys.add(k)));
+      document.querySelectorAll('.map-slot .prov').forEach(p => {
+        const k = p.dataset.name;
+        if (keys.has(k) || (IRAN_ISLAND_PARENT[k] && keys.has(IRAN_ISLAND_PARENT[k]))) {
+          p.classList.add('active');
+        }
+      });
+    }
+    function mapProvinceClick(key) {
+      const fa = IRAN_FA[key];
+      if (!fa) return;
+      const sel = document.getElementById('revProvince');
+      let match = fa;
+      if (![...sel.options].some(o => o.value === match)) {
+        const aliases = { 'kvab': 'کهگیلویه و بویراحمد' };
+        match = aliases[key] || fa;
+      }
+      if ([...sel.options].some(o => o.value === match)) {
+        sel.value = match;
+        switchTab('plate');
+        reverseLookup();
+        document.getElementById('revResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
     /* ============ کد ملی ============ */
+    function nationalValid(n) {
+      if (!/^\d{10}$/.test(n)) return null;
+      let sum = 0;
+      for (let i = 0; i < 9; i++) sum += (+n[i]) * (10 - i);
+      const rem = sum % 11;
+      const c = rem < 2 ? rem : 11 - rem;
+      return c === (+n[9]);
+    }
     function lookupNational() {
       let val = toEn(document.getElementById('nationalInput').value.trim()).replace(/\D/g, '');
       if (val.length < 3) {
@@ -618,28 +878,41 @@
       const title = document.getElementById('resultTitleNational');
       const prov = document.getElementById('resultProvinceNational');
       const city = document.getElementById('resultCityNational');
+      const check = document.getElementById('resultCheckNational');
       const note = document.getElementById('resultNoteNational');
       box.classList.add('show');
       if (errMsg) {
         box.className = 'result-box danger show';
-        title.textContent = '❌ خطا'; prov.textContent = errMsg; city.textContent = ''; note.textContent = '';
+        title.textContent = '❌ خطا'; prov.textContent = errMsg; city.textContent = ''; check.textContent = ''; note.textContent = '';
+        highlightProvinces([]);
         return;
       }
       if (!data) {
         box.className = 'result-box danger show';
         title.textContent = '❌ قابل شناسایی نیست';
         prov.textContent = `پیش‌شماره ${toFa(prefix)} در داده‌های فعلی یافت نشد.`;
-        city.textContent = '';
+        city.textContent = ''; check.textContent = '';
         note.textContent = 'ممکن است مربوط به شهرستان کوچک‌تر، صادره خارج از کشور یا داده‌های کامل‌تر باشد.';
+        highlightProvinces([]);
         return;
       }
       box.className = 'result-box success show';
       title.textContent = '✅ شناسایی شد';
       prov.innerHTML = `<span>استان:</span> ${data.province}`;
       city.innerHTML = `<span>شهر / محل صدور:</span> ${data.city || '—'}`;
+      const full = toEn(document.getElementById('nationalInput').value.trim()).replace(/\D/g, '');
+      let checkTxt = '';
+      if (full.length === 10) {
+        const ok = nationalValid(full);
+        checkTxt = ok ? '🟢 رقم کنترل درست است — کد ملی معتبر' : '🔴 رقم کنترل نادرست است — کد ملی معتبر نیست (احتمالاً اشتباه تایپی یا جعلی)';
+      } else {
+        checkTxt = 'ℹ️ برای اعتبارسنجی رقم کنترل، کل ۱۰ رقم کد ملی را وارد کنید';
+      }
+      check.innerHTML = `<span>اعتبارسنجی:</span> ${checkTxt}`;
       note.textContent = `سه رقم اول کد ملی: ${toFa(prefix)} · محل صدور شناسنامه`;
       window._lastNational = { prefix, province: data.province, city: data.city };
       addHistory('national', { prefix, province: data.province, city: data.city, query: prefix });
+      highlightProvinces([data.province]);
     }
 
     /* ============ موتورسیکلت ============ */
@@ -655,6 +928,7 @@
         title.textContent = '❌ ورودی نامعتبر';
         prov.textContent = 'کد سه رقمی معتبر وارد کنید.';
         note.textContent = '';
+        highlightProvinces([]);
         return;
       }
       const n = parseInt(val, 10);
@@ -667,6 +941,7 @@
         title.textContent = '❌ قابل شناسایی نیست';
         prov.textContent = `کد ${toFa(val)} در داده‌های فعلی یافت نشد.`;
         note.textContent = '';
+        highlightProvinces([]);
         return;
       }
       box.className = 'result-box success show';
@@ -675,6 +950,166 @@
       note.textContent = `کد ${toFa(val)} → ${found}`;
       window._lastMotor = { code: val, province: found };
       addHistory('motor', { code: val, province: found, query: val });
+      const clean = found.includes('البرز') ? 'البرز / تهران' : found.replace('شهر تهران', 'تهران');
+      highlightProvinces(clean.split(' / '));
+    }
+
+    /* ============ سایر شناسه‌ها ============ */
+    const OTHER_MODES = {
+      postal:   { label: 'کد پستی ۱۰ رقمی', hint: '۵ رقم اول کد پستی محل (شهر و منطقه) را مشخص می‌کند', placeholder: 'مثلاً 1359663611', max: 10 },
+      card:     { label: 'شماره کارت بانکی (۱۶ رقم)', hint: '۶ رقم اول کارت بانک صادرکننده را مشخص می‌کند + اعتبارسنجی Luhn', placeholder: '6037 9911 2233 4455', max: 16 },
+      sheba:    { label: 'شماره شبا (IR + ۲۴ رقم)', hint: 'کد ۳ رقمی وسط شبا بانک را مشخص می‌کند + اعتبارسنجی MOD 97', placeholder: 'IR820120020000001234567890', max: 24 },
+      mobile:   { label: 'شماره موبایل (۱۱ رقم)', hint: '۴ رقم اول، اپراتور سیم‌کارت را مشخص می‌کند', placeholder: '09123456789', max: 11 },
+      landline: { label: 'شماره تلفن ثابت', hint: 'کد استان از روی پیش‌شماره مشخص می‌شود (مثلاً 021 تهران)', placeholder: '02188743600', max: 11 }
+    };
+    let otherMode = 'postal';
+    function setOtherMode(mode) {
+      otherMode = mode;
+      document.querySelectorAll('#otherModes .chip').forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+      const cfg = OTHER_MODES[mode];
+      document.getElementById('otherLabel').textContent = cfg.label;
+      document.getElementById('otherHint').textContent = cfg.hint;
+      const inp = document.getElementById('otherInput');
+      inp.placeholder = cfg.placeholder;
+      inp.maxLength = (mode === 'sheba' ? 32 : cfg.max + 4);
+      inp.value = '';
+      hideResult('other');
+      inp.focus();
+    }
+    function formatOtherInput() {
+      const inp = document.getElementById('otherInput');
+      let v = toEn(inp.value).replace(/\s+/g, '').toUpperCase();
+      if (otherMode === 'card') {
+        v = v.replace(/[^0-9]/g, '').slice(0, 16);
+        v = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+      } else if (otherMode === 'sheba') {
+        v = v.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        if (/^IR/.test(v)) v = 'IR' + v.slice(2).replace(/\D/g, '').slice(0, 24);
+        v = v.replace(/(\w{4})(?=\w)/g, '$1 ');
+      } else if (otherMode === 'mobile') {
+        v = v.replace(/[^0-9]/g, '').slice(0, 11);
+        if (v.length > 4) v = v.slice(0, 4) + ' ' + v.slice(4).replace(/(\d{3})(?=\d)/g, '$1 ');
+      } else if (otherMode === 'landline') {
+        v = v.replace(/[^0-9]/g, '').slice(0, 11);
+      } else {
+        v = v.replace(/[^0-9]/g, '').slice(0, 10);
+        if (v.length > 3) v = v.slice(0, 3) + ' ' + v.slice(3);
+      }
+      inp.value = v;
+    }
+    function luhnValid(n) {
+      const digits = String(n).split('').map(Number);
+      let sum = 0, alt = false;
+      for (let i = digits.length - 1; i >= 0; i--) {
+        let d = digits[i];
+        if (alt) { d *= 2; if (d > 9) d -= 9; }
+        sum += d; alt = !alt;
+      }
+      return sum % 10 === 0;
+    }
+    function shebaValid(s) {
+      if (!/^IR\d{24}$/.test(s)) return false;
+      const moved = s.slice(4) + s.slice(0, 4);
+      let num = '';
+      for (const ch of moved) {
+        const c = ch.charCodeAt(0);
+        num += c >= 65 ? String(c - 55) : ch;
+      }
+      try { return BigInt(num) % 97n === 1n; } catch (e) { return false; }
+    }
+    function lookupOther() {
+      const raw = toEn(document.getElementById('otherInput').value).replace(/[\s-]/g, '').toUpperCase();
+      const box = document.getElementById('resultBoxOther');
+      box.classList.add('show');
+      const show = (cls, title, l1, l2, l3, note, provs) => {
+        box.className = 'result-box ' + cls + ' show';
+        document.getElementById('resultTitleOther').innerHTML = title;
+        document.getElementById('resultLine1Other').innerHTML = l1 || '';
+        document.getElementById('resultLine2Other').innerHTML = l2 || '';
+        document.getElementById('resultLine3Other').innerHTML = l3 || '';
+        document.getElementById('resultNoteOther').textContent = note || '';
+        window._lastOther = { mode: otherMode, title: title.replace(/<[^>]+>/g, ''), l1: (l1||'').replace(/<[^>]+>/g,''), l2: (l2||'').replace(/<[^>]+>/g,''), l3: (l3||'').replace(/<[^>]+>/g,''), note: note || '' };
+        highlightProvinces(provs || []);
+      };
+      const fail = (msg) => show('danger', '❌ ورودی نامعتبر', null, null, null, msg);
+
+      if (otherMode === 'postal') {
+        if (!/^\d{10}$/.test(raw)) return fail('کد پستی باید دقیقاً ۱۰ رقم باشد.');
+        const city = POSTAL_D3[raw.slice(0, 3)];
+        const prov = (city && CITY_PROV[city]) || POSTAL_D2[raw.slice(0, 2)] || POSTAL_D1[raw[0]] || null;
+        const fmt = toFa(raw.slice(0, 3)) + '-' + toFa(raw.slice(3));
+        if (!prov) return show('danger', '❌ قابل شناسایی نیست', null, null, null, `کد پستی ${fmt} با پیش‌شماره ناشناخته است.`, []);
+        const multi = POSTAL_D1[raw[0]] && !POSTAL_D2[raw.slice(0, 2)];
+        show(multi ? 'warning' : 'success',
+          multi ? '⚠️ استان تقریبی' : '✅ شناسایی شد',
+          `<span>کد پستی:</span> ${fmt}`,
+          `<span>استان:</span> ${prov}`,
+          city ? `<span>شهر:</span> ${city}` : '',
+          'بر اساس جداول عمومی شرکت پست — ۵ رقم اول محل را مشخص می‌کند',
+          multi ? [] : [prov]);
+        addHistory('other', { mode: 'postal', province: prov, city: city || '', query: raw, text: `کد پستی ${toFa(raw.slice(0,3))}… → ${prov}${city ? ' / ' + city : ''}` });
+        return;
+      }
+
+      if (otherMode === 'card') {
+        if (!/^\d{16}$/.test(raw)) return fail('شماره کارت باید دقیقاً ۱۶ رقم باشد.');
+        const ok = luhnValid(raw);
+        if (!ok) return show('danger', '❌ شماره کارت نامعتبر', `<span>کارت:</span> ${toFa(raw.replace(/(\d{4})(?=\d)/g, '$1 '))}`, null, null, 'الگوریتم Luhn تأیید نکرد — احتمالاً شماره اشتباه یا جعلی است. هیچ بانکی این شماره را صادر نکرده.', []);
+        const bank = CARD_BIN[raw.slice(0, 6)] || 'ناشناخته';
+        const known = !!CARD_BIN[raw.slice(0, 6)];
+        show(known ? 'success' : 'warning', known ? '✅ کارت معتبر است' : '⚠️ کارت معتبر، بانک ناشناخته',
+          `<span>کارت:</span> ${toFa(raw.replace(/(\d{4})(?=\d)/g, '$1 '))}`,
+          known ? `<span>بانک صادرکننده:</span> ${bank}` : `<span>BIN:</span> ${toFa(raw.slice(0,6))}`,
+          `<span>شبکه:</span> ${toFa(raw[0]) === '۶' ? 'شتاب' : 'شتاب'}`,
+          '۶ رقم اول (BIN) بانک صادرکننده را مشخص می‌کند · اعتبارسنجی با الگوریتم Luhn');
+        addHistory('other', { mode: 'card', province: '', city: '', query: raw.slice(0, 6), text: `کارت ${toFa(raw.slice(0,6))}… → ${bank}` });
+        return;
+      }
+
+      if (otherMode === 'sheba') {
+        if (!/^IR\d{24}$/.test(raw)) return fail('شبا باید با IR شروع شود و ۲۶ کاراکتر (IR + ۲۴ رقم) باشد.');
+        const ok = shebaValid(raw);
+        if (!ok) return show('danger', '❌ شبا نامعتبر', null, null, null, 'الگوریتم MOD 97 تأیید نکرد — شماره شبا اشتباه است (رقم کنترل یا ارقام جابه‌جا شده).', []);
+        const bank = SHEBA_BANK[raw.slice(4, 7)] || 'ناشناخته';
+        const known = !!SHEBA_BANK[raw.slice(4, 7)];
+        show(known ? 'success' : 'warning', known ? '✅ شبا معتبر است' : '⚠️ شبا معتبر، بانک ناشناخته',
+          `<span>شبا:</span> ${toFa(raw.replace(/(\w{4})(?=\w)/g, '$1 '))}`,
+          known ? `<span>بانک:</span> ${bank}` : `<span>کد بانک:</span> ${toFa(raw.slice(4,7))}`,
+          `<span>کد کنترل:</span> ${toFa(raw.slice(2,4))} ✓`,
+          'کد سه‌رقمی وسط شبا بانک را مشخص می‌کند · اعتبارسنجی با MOD 97');
+        addHistory('other', { mode: 'sheba', province: '', city: '', query: raw.slice(0, 11), text: `شبا ${toFa(raw.slice(4,7))} → ${bank}` });
+        return;
+      }
+
+      if (otherMode === 'mobile') {
+        if (!/^09\d{9}$/.test(raw)) return fail('شماره موبایل باید ۱۱ رقم و با 09 شروع شود.');
+        const op = MOBILE_OP[raw.slice(0, 4)] || 'اپراتور ناشناخته (شاید جدید)';
+        const known = !!MOBILE_OP[raw.slice(0, 4)];
+        const note = raw.slice(0, 4) === '0912' ? 'پیش‌شماره 0912 دائمی است و برای تهران، البرز، قم، سمنان، زنجان و قزوین صادر شده است.' : 'پیش‌شماره‌های موبایل بر اساس جداول عمومی اپراتورها';
+        show(known ? 'success' : 'warning', known ? '✅ شناسایی شد' : '⚠️ اپراتور ناشناخته',
+          `<span>شماره:</span> ${toFa(raw.slice(0,4) + ' ' + raw.slice(4,7) + ' ' + raw.slice(7))}`,
+          `<span>اپراتور:</span> ${op}`,
+          '',
+          note);
+        addHistory('other', { mode: 'mobile', province: '', city: '', query: raw.slice(0, 4), text: `موبایل ${toFa(raw.slice(0,4))}… → ${op}` });
+        return;
+      }
+
+      if (otherMode === 'landline') {
+        if (!/^0\d{9,10}$/.test(raw)) return fail('شماره ثابت باید با 0 و سپس کد استان (۳ رقم) و شماره مشترک باشد.');
+        const code = raw.slice(0, 3);
+        const area = AREA_CODE[code];
+        if (!area) return show('danger', '❌ قابل شناسایی نیست', `<span>کد:</span> ${toFa(code)}`, null, null, 'این پیش‌شماره در جدول فعلی نیست — شاید کد بین‌المللی یا شماره ویژه است.', []);
+        const provName = area.replace(/\s*\(.*\)/, '');
+        show('success', '✅ شناسایی شد',
+          `<span>شماره:</span> ${toFa(raw.slice(0,3) + '-' + raw.slice(3))}`,
+          `<span>پیش‌شماره:</span> ${toFa(code)}`,
+          `<span>منطقه:</span> ${area}`,
+          'بر اساس جدول رسمی همسان‌سازی کدهای مخابرات',
+          [provName]);
+        addHistory('other', { mode: 'landline', province: provName, city: area, query: code, text: `ثابت ${toFa(code)} → ${area}` });
+        return;
+      }
     }
 
     /* ============ تاریخچه ============ */
@@ -682,7 +1117,7 @@
       try { return JSON.parse(localStorage.getItem('pelakyab_history') || '[]'); } catch (e) { return []; }
     }
     function saveHistory(h) {
-      try { localStorage.setItem('pelakyab_history', JSON.stringify(h.slice(0, 10))); } catch (e) {}
+      try { localStorage.setItem('pelakyab_history', JSON.stringify(h.slice(0, 15))); } catch (e) {}
     }
     function addHistory(type, item) {
       const h = getHistory();
@@ -691,30 +1126,29 @@
       saveHistory(h);
       renderHistory();
     }
+    const OTHER_ICON = { postal: '📮', card: '💳', sheba: '🏦', mobile: '📱', landline: '☎️' };
     function renderHistory() {
       const h = getHistory();
-      const plateBox = document.getElementById('historyPlate');
-      const natBox = document.getElementById('historyNational');
-      const plateItems = h.filter(x => x.type === 'plate');
-      const natItems = h.filter(x => x.type === 'national' || x.type === 'motor');
       const fmt = ts => {
         const d = new Date(ts);
-        return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        try { return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
       };
-      const render = (items, type) => {
+      const render = (items) => {
         if (!items.length) return '<p class="hist-empty">هنوز جستجویی ثبت نشده.</p>';
         return items.map(x => {
           let icon = '🚗', text = '';
-          if (type === 'plate') { icon = '🚗'; text = `کد ${toFa(x.query)} → ${x.province}${x.city ? ' / ' + x.city : ''}`; }
+          if (x.type === 'plate') { icon = '🚗'; text = `کد ${toFa(x.query)} → ${x.province}${x.city ? ' / ' + x.city : ''}`; }
           else if (x.type === 'national') { icon = '🪪'; text = `کد ملی ${toFa(x.query)} → ${x.province}${x.city ? ' / ' + x.city : ''}`; }
-          else { icon = '🏍️'; text = `کد موتور ${toFa(x.query)} → ${x.province}`; }
-          return `<div class="hist-item" onclick="replayHistory('${type}','${x.query}')"><span class="h-icon">${icon}</span><span class="h-text">${text}</span><span class="h-time">${fmt(x.t)}</span></div>`;
+          else if (x.type === 'motor') { icon = '🏍️'; text = `کد موتور ${toFa(x.query)} → ${x.province}`; }
+          else { icon = OTHER_ICON[x.mode] || '🔎'; text = x.text || `${x.query} → ${x.province}`; }
+          return `<div class="hist-item" onclick="replayHistory('${x.type}','${x.query}','${x.mode || ''}')"><span class="h-icon">${icon}</span><span class="h-text">${text}</span><span class="h-time">${fmt(x.t)}</span></div>`;
         }).join('') + `<button class="hist-clear" onclick="clearHistory()">پاک کردن تاریخچه</button>`;
       };
-      plateBox.innerHTML = render(plateItems, 'plate');
-      natBox.innerHTML = render(natItems, 'national');
+      document.getElementById('historyPlate').innerHTML = render(h.filter(x => x.type === 'plate'));
+      document.getElementById('historyNational').innerHTML = render(h.filter(x => x.type === 'national' || x.type === 'motor'));
+      document.getElementById('historyOther').innerHTML = render(h.filter(x => x.type === 'other'));
     }
-    function replayHistory(type, query) {
+    function replayHistory(type, query, mode) {
       if (type === 'plate') {
         switchTab('plate');
         document.getElementById('mode').value = 'code';
@@ -725,6 +1159,11 @@
         switchTab('national');
         document.getElementById('nationalInput').value = query;
         lookupNational();
+      } else if (type === 'other') {
+        switchTab('other');
+        setOtherMode(mode || 'postal');
+        document.getElementById('otherInput').value = query;
+        lookupOther();
       }
     }
     function clearHistory() {
@@ -732,36 +1171,276 @@
       renderHistory();
     }
 
-    /* ============ اشتراک ============ */
+    /* ============ اشتراک متنی ============ */
     function copyResult(type) {
-      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : 'Motor')];
+      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : type === 'motor' ? 'Motor' : 'Other')];
       if (!r) return;
       let text = '';
       if (type === 'plate') text = `پلاک‌یاب\nکد ${toFa(r.code)}${r.letter ? ' حرف ' + r.letter : ''}\nاستان: ${r.province}\nمنطقه: ${r.cities}`;
       else if (type === 'national') text = `پلاک‌یاب\nکد ملی ${toFa(r.prefix)}\nاستان: ${r.province}\nشهر: ${r.city}`;
-      else text = `پلاک‌یاب\nموتور ${toFa(r.code)} → ${r.province}`;
+      else if (type === 'motor') text = `پلاک‌یاب\nموتور ${toFa(r.code)} → ${r.province}`;
+      else text = `پلاک‌یاب\n${r.l1}\n${r.l2}\n${r.l3}`.replace(/\n+/g, '\n');
       const done = () => {
         try { navigator.clipboard.writeText(text).then(() => alert('کپی شد ✓')); } catch (e) {}
       };
       if (navigator.clipboard) done(); else { alert(text); }
     }
     function shareResult(type, channel) {
-      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : 'Motor')];
+      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : type === 'motor' ? 'Motor' : 'Other')];
       if (!r) return;
       let text = '';
       if (type === 'plate') text = `پلاک ${toFa(r.code)}${r.letter ? ' (حرف ' + r.letter + ')' : ''} متعلق به ${r.province} است.${r.cities ? ' منطقه: ' + r.cities : ''}`;
       else if (type === 'national') text = `کد ملی ${toFa(r.prefix)} → ${r.province}${r.city ? ' / ' + r.city : ''}`;
-      else text = `کد موتور ${toFa(r.code)} → ${r.province}`;
+      else if (type === 'motor') text = `کد موتور ${toFa(r.code)} → ${r.province}`;
+      else text = [r.l1, r.l2, r.l3].filter(Boolean).join(' · ');
       const full = `پلاک‌یاب هوشمند 🔍\n${text}`;
       const enc = encodeURIComponent(full);
       if (channel === 'whatsapp') window.open('https://wa.me/?text=' + enc, '_blank');
       else if (channel === 'telegram') window.open('https://t.me/share/url?url=' + encodeURIComponent(location.href) + '&text=' + enc, '_blank');
     }
 
+    /* ============ کارت اشتراک تصویری (Canvas) ============ */
+    async function shareCardImage(type) {
+      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : type === 'motor' ? 'Motor' : 'Other')];
+      if (!r) return;
+      try { await document.fonts.load('700 40px Vazirmatn'); } catch (e) {}
+      const W = 1080, H = 1350;
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      const ctx = c.getContext('2d');
+      if (!ctx) return;
+      const FONT = 'Vazirmatn, Tahoma, sans-serif';
+      const roundRect = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      };
+      // پس‌زمینه
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, '#0b1120'); g.addColorStop(1, '#131c31');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(56,189,248,0.07)';
+      ctx.beginPath(); ctx.arc(900, 150, 260, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(120, 1150, 320, 0, Math.PI * 2); ctx.fill();
+      // لوگو
+      ctx.fillStyle = '#0ea5e9';
+      roundRect(470, 90, 140, 140, 36); ctx.fill();
+      ctx.font = '72px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🔍', 540, 165);
+      // عنوان
+      ctx.fillStyle = '#e2e8f0'; ctx.font = `700 46px ${FONT}`;
+      ctx.fillText('پلاک‌یاب هوشمند', 540, 300);
+      ctx.fillStyle = '#94a3b8'; ctx.font = `400 26px ${FONT}`;
+      ctx.fillText('رمزگشایی شناسه‌های عمومی', 540, 350);
+      // کارت محتوا
+      ctx.fillStyle = '#1a243a';
+      roundRect(90, 410, 900, 760, 28); ctx.fill();
+      ctx.strokeStyle = '#2a3655'; ctx.lineWidth = 2;
+      roundRect(90, 410, 900, 760, 28); ctx.stroke();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#38bdf8'; ctx.font = `700 30px ${FONT}`;
+      ctx.fillText('نتیجه جستجو', 540, 465);
+      ctx.strokeStyle = '#2a3655'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(160, 505); ctx.lineTo(920, 505); ctx.stroke();
+
+      if (type === 'plate' && r.code) {
+        // دیاگرام پلاک
+        const bw = 780, bh = 170, bx = (W - bw) / 2, by = 580;
+        ctx.fillStyle = r.type && r.type.indexOf('تاکسی') > -1 ? '#fde047' : r.type && (r.type.indexOf('دولتی') > -1 || r.type.indexOf('تشریفات') > -1) ? '#dc2626' : r.type && r.type.indexOf('نظامی') > -1 ? '#16a34a' : '#ffffff';
+        roundRect(bx, by, bw, bh, 18); ctx.fill();
+        const bandW = 90;
+        const bg2 = ctx.createLinearGradient(bx, by, bx, by + bh);
+        bg2.addColorStop(0, '#2396f3'); bg2.addColorStop(1, '#0b4da2');
+        ctx.fillStyle = bg2;
+        roundRect(bx + 10, by + 10, bandW, bh - 20, 10); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = `700 24px ${FONT}`;
+        ctx.fillText('IRAN', bx + 10 + bandW / 2, by + bh / 2 + 18);
+        const segs = [toFa(r.code), r.letter, toFa(r.mid || ''), toFa(r.code2 || '')];
+        const segW = (bw - 30 - bandW) / 4;
+        segs.forEach((s, i) => {
+          const sx = bx + 20 + bandW + i * segW;
+          ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
+          roundRect(sx, by + 10, segW - 8, bh - 20, 8); ctx.stroke();
+          ctx.fillStyle = '#0f172a'; ctx.font = `800 64px ${FONT}`;
+          ctx.fillText(s, sx + (segW - 8) / 2, by + bh / 2 + 4);
+        });
+        ctx.fillStyle = '#94a3b8'; ctx.font = `400 28px ${FONT}`;
+        ctx.fillText(`استان: ${r.province}`, 540, 800);
+        ctx.fillText(`منطقه: ${r.cities}`, 540, 850);
+        if (r.type) { ctx.fillText(`نوع: ${r.type}`, 540, 900); }
+      } else {
+        const lines = [];
+        if (type === 'national') lines.push(`کد ملی: ${toFa(r.prefix)}…`, `استان: ${r.province}`, `شهر: ${r.city || '—'}`);
+        else if (type === 'motor') lines.push(`کد موتور: ${toFa(r.code)}`, `استان: ${r.province}`);
+        else lines.push(r.l1, r.l2, r.l3);
+        ctx.textAlign = 'center';
+        lines.filter(Boolean).forEach((ln, i) => {
+          ctx.fillStyle = i === 0 ? '#e2e8f0' : '#94a3b8';
+          ctx.font = i === 0 ? `700 40px ${FONT}` : `400 34px ${FONT}`;
+          ctx.fillText(ln, 540, 620 + i * 90);
+        });
+      }
+      // فوتر
+      ctx.fillStyle = '#64748b'; ctx.font = `400 24px ${FONT}`;
+      ctx.fillText('داده‌ها بر پایه منابع عمومی و تقریبی هستند', 540, 1230);
+      ctx.fillStyle = '#38bdf8'; ctx.font = `700 30px ${FONT}`;
+      ctx.fillText('🔍 پلاک‌یاب هوشمند', 540, 1290);
+
+      const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+      const file = new File([blob], 'pelakyab.png', { type: 'image/png' });
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'پلاک‌یاب هوشمند' });
+          return;
+        }
+      } catch (e) {}
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'pelakyab.png';
+      a.click();
+      alert('کارت تصویری ساخته شد ✓');
+    }
+
+    /* ============ اسکن پلاک با دوربین (OCR) ============ */
+    const L2P = { 'b':'ب','j':'ج','d':'د','s':'س','t':'ت','k':'ک','m':'م','n':'ن','v':'و','h':'ه','y':'ی','l':'ل','g':'گ','e':'ع','z':'ز','f':'ف','p':'پ','x':'ژ','o':'ع','c':'ص','i':'ی','a':'ا','q':'ق','w':'و','r':'ر' };
+    let scanStream = null;
+    let tesseractPromise = null;
+    function loadTesseract() {
+      if (!tesseractPromise) {
+        tesseractPromise = new Promise((res, rej) => {
+          if (window.Tesseract) return res(window.Tesseract);
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+          s.onload = () => res(window.Tesseract);
+          s.onerror = () => rej(new Error('بارگذاری موتور تشخیص خطا کرد'));
+          document.head.appendChild(s);
+        });
+      }
+      return tesseractPromise;
+    }
+    function openScanner() {
+      const modal = document.getElementById('scanModal');
+      modal.classList.add('show');
+      document.getElementById('scanStatus').textContent = 'دوربین در حال آماده‌سازی…';
+      document.getElementById('scanResultBox').innerHTML = '';
+      document.getElementById('scanBar').style.width = '0%';
+      document.getElementById('scanProgress').classList.add('hidden');
+      document.getElementById('scanVideo').classList.remove('hidden');
+      document.getElementById('scanVideo').style.display = 'block';
+      document.getElementById('scanCaptureBtn').disabled = true;
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+          .then(stream => {
+            scanStream = stream;
+            const v = document.getElementById('scanVideo');
+            v.srcObject = stream;
+            v.play().catch(() => {});
+            document.getElementById('scanStatus').textContent = 'پلاک را در کادر بگیرید و دکمه «عکس بگیر» را بزنید';
+            document.getElementById('scanCaptureBtn').disabled = false;
+          })
+          .catch(() => {
+            document.getElementById('scanStatus').textContent = 'دوربین در دسترس نیست — از «انتخاب عکس» استفاده کنید';
+            document.getElementById('scanVideo').style.display = 'none';
+          });
+      } else {
+        document.getElementById('scanStatus').textContent = 'دوربین در دسترس نیست — از «انتخاب عکس» استفاده کنید';
+        document.getElementById('scanVideo').style.display = 'none';
+      }
+      const f = document.getElementById('scanFile');
+      f.onchange = () => { if (f.files && f.files[0]) recognizeImage(f.files[0]); };
+    }
+    function closeScanner() {
+      document.getElementById('scanModal').classList.remove('show');
+      if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+    }
+    function captureFrame() {
+      const v = document.getElementById('scanVideo');
+      if (!v.videoWidth) return;
+      const c = document.createElement('canvas');
+      c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0);
+      recognizeCanvas(c);
+    }
+    function ocrProgress(p) {
+      document.getElementById('scanProgress').classList.remove('hidden');
+      document.getElementById('scanBar').style.width = Math.round(p * 100) + '%';
+      document.getElementById('scanStatus').textContent = 'در حال خواندن پلاک… ' + Math.round(p * 100) + '٪';
+    }
+    function parsePlateText(text) {
+      const t = toEn(text).replace(/[‌\-_]/g, ' ').replace(/\s+/g, ' ').trim();
+      let m = t.match(/(^|\s)(\d{2})\s*([\u0600-\u06FFa-zA-Z])\s*(\d{3,4})\s*(\d{2})(\s|$)/);
+      if (!m) {
+        const letters = t.replace(/[^\u0600-\u06FFa-zA-Z]/g, '');
+        const digits = t.replace(/[^0-9]/g, '');
+        if (letters && digits.length >= 7) {
+          const dm = digits.match(/^(\d{2})(\d{3,4})(\d{2})/);
+          if (dm) return { code: dm[1], letter: letters[0], mid: dm[2], code2: dm[3], loose: true };
+        }
+        return null;
+      }
+      let letter = m[3];
+      if (/[a-zA-Z]/.test(letter)) letter = L2P[letter.toLowerCase()] || letter;
+      return { code: m[2], letter, mid: m[4], code2: m[5] };
+    }
+    async function recognizeCanvas(c) {
+      const box = document.getElementById('scanResultBox');
+      const st = document.getElementById('scanStatus');
+      st.textContent = 'در حال آماده‌سازی موتور تشخیص…';
+      try {
+        const T = await loadTesseract();
+        const worker = await T.createWorker('fas', 1, { logger: m => { if (m.status === 'recognizing text') ocrProgress(m.progress); } });
+        const { data } = await worker.recognize(c);
+        await worker.terminate();
+        const parsed = parsePlateText(data.text);
+        if (!parsed) {
+          const rawText = (data.text || '').trim() || '—';
+          box.innerHTML = `<div class="scan-ocr-result">متن خوانده‌شده:<br><b>${rawText.replace(/</g, '&lt;')}</b><br><span style="color:var(--text-muted);font-size:.78rem">الگوی پلاک پیدا نشد — عکس واضح‌تری بگیرید یا دستی وارد کنید.</span></div>`;
+          return;
+        }
+        const plateStr = `${toFa(parsed.code)} ${parsed.letter} ${toFa(parsed.mid)} - ${toFa(parsed.code2)}`;
+        box.innerHTML = `<div class="scan-ocr-result">
+          پلاک خوانده‌شده:<br><b style="font-size:1.3rem;letter-spacing:2px">${plateStr}</b>
+          ${parsed.loose ? '<br><span style="color:var(--warning);font-size:.78rem">تشخیص تقریبی — قبل از جستجو بررسی کنید</span>' : ''}
+          <div class="btn-row">
+            <button class="btn" onclick="useScannedPlate('${parsed.code}','${parsed.letter}','${parsed.mid}','${parsed.code2}')">✅ جستجوی این پلاک</button>
+          </div>
+        </div>`;
+        st.textContent = 'تشخیص انجام شد — نتیجه را بررسی کنید';
+      } catch (e) {
+        box.innerHTML = `<div class="scan-ocr-result">❌ ${e.message || 'خطا در تشخیص'} — اتصال اینترنت لازم است (موتور OCR از CDN بارگذاری می‌شود).</div>`;
+        st.textContent = '';
+      }
+    }
+    function recognizeImage(file) {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        const scale = Math.min(1, 1600 / img.width);
+        c.width = img.width * scale; c.height = img.height * scale;
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        recognizeCanvas(c);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+    function useScannedPlate(code, letter, mid, code2) {
+      closeScanner();
+      switchTab('plate');
+      document.getElementById('mode').value = 'full';
+      updateMode();
+      document.getElementById('fullInput').value = `${toFa(code)} ${letter} ${toFa(mid)} - ${toFa(code2)}`;
+      lookupPlate();
+    }
+
     /* ============ راهنماها ============ */
     function toggleGuide(which) {
-      const map = { plate: 'guideContentPlate', national: 'guideContentNational', motor: 'guideContentMotor', types: 'guideContentTypes' };
-      const tog = { plate: 'guideTogglePlate', national: 'guideToggleNational', motor: 'guideToggleMotor', types: 'guideToggleTypes' };
+      const map = { plate: 'guideContentPlate', national: 'guideContentNational', motor: 'guideContentMotor', types: 'guideContentTypes', other: 'guideContentOther' };
+      const tog = { plate: 'guideTogglePlate', national: 'guideToggleNational', motor: 'guideToggleMotor', types: 'guideToggleTypes', other: 'guideToggleOther' };
       const content = document.getElementById(map[which]);
       const toggle = document.getElementById(tog[which]);
       content.classList.toggle('open');
@@ -770,7 +1449,6 @@
     }
 
     function buildGuides() {
-      // راهنمای پلاک: استان → کدها
       const provs = {};
       Object.keys(PLATE_DATA).sort((a, b) => a - b).forEach(c => {
         const d = PLATE_DATA[c];
@@ -788,7 +1466,6 @@
       });
       document.getElementById('guideContentPlate').innerHTML = html;
 
-      // راهنمای کد ملی
       const natProvs = {};
       Object.keys(NATIONAL_DATA).sort().forEach(k => {
         const parts = NATIONAL_DATA[k].split(' / ');
@@ -802,7 +1479,6 @@
       });
       document.getElementById('guideContentNational').innerHTML = html;
 
-      // راهنمای موتور
       html = '';
       MOTOR_DATA.forEach(m => {
         const first = m.codes[0], last = m.codes[m.codes.length - 1];
@@ -811,7 +1487,6 @@
       });
       document.getElementById('guideContentMotor').innerHTML = '<div class="province-group">' + html + '</div>';
 
-      // راهنمای انواع پلاک
       const types = [
         ['ب، ج، د، س، ص، ط، ق، ل، م، ن، و، ه، ی', 'خودروی شخصی', '#f1f5f9', 'personal'],
         ['الف', 'دولتی', '#dc2626', 'gov'],
@@ -832,6 +1507,23 @@
         types.map(t => `<tr><td><b>${t[0]}</b></td><td>${t[1]}</td><td><span class="swatch" style="background:${t[2]}"></span></td></tr>`).join('') +
         '</table>';
       document.getElementById('guideContentTypes').innerHTML = html;
+
+      /* راهنمای سایر شناسه‌ها */
+      let o = '<div class="province-group"><div class="province-name">☎️ پیش‌شماره تلفن ثابت (استان‌ها)</div>';
+      o += `<table class="types"><tr><th>پیش‌شماره</th><th>استان (مرکز)</th></tr>` +
+        Object.keys(AREA_CODE).sort((a, b) => +a - +b).map(k => `<tr><td><b>0${toFa(k)}</b></td><td>${AREA_CODE[k]}</td></tr>`).join('') + '</table></div>';
+      o += '<div class="province-group"><div class="province-name">📮 کد پستی — رقم اول</div>';
+      o += `<table class="types"><tr><th>رقم اول</th><th>استان‌ها</th></tr>` +
+        Object.keys(POSTAL_D1).map(k => `<tr><td><b>${toFa(k)}</b></td><td>${POSTAL_D1[k]}</td></tr>`).join('') + '</table></div>';
+      const ops = {};
+      Object.keys(MOBILE_OP).forEach(k => (ops[MOBILE_OP[k]] = ops[MOBILE_OP[k]] || []).push(k));
+      o += '<div class="province-group"><div class="province-name">📱 اپراتورهای موبایل</div>';
+      o += Object.keys(ops).map(op => `<div class="code-row"><span class="code-info"><strong>${op}</strong> — ${ops[op].map(toFa).join('، ')}</span></div>`).join('') + '</div>';
+      o += '<div class="province-group"><div class="province-name">💳 بانک‌های قابل شناسایی</div>';
+      o += `<div class="code-row"><span class="code-info">کارت بانکی: ${[...new Set(Object.values(CARD_BIN))].length} بانک · شبا: ${[...new Set(Object.values(SHEBA_BANK))].length} بانک</span></div>`;
+      o += '</div>';
+      o += '<p style="font-size:.74rem;color:var(--text-muted)">توجه: داده‌های شناسه‌ها تقریبی‌اند و بانک‌های جدید ممکن است با جدول مطابقت نداشته باشند.</p>';
+      document.getElementById('guideContentOther').innerHTML = o;
     }
 
     function compressRanges(nums) {
@@ -852,14 +1544,17 @@
       if (e.key !== 'Enter') return;
       if (!document.getElementById('panelPlate').classList.contains('hidden')) lookupPlate();
       else if (!document.getElementById('panelNational').classList.contains('hidden')) lookupNational();
-      else lookupMotor();
+      else if (!document.getElementById('panelMotor').classList.contains('hidden')) lookupMotor();
+      else lookupOther();
     });
+    document.getElementById('otherInput').addEventListener('input', formatOtherInput);
 
+    initTheme();
     buildReverseOptions();
     buildGuides();
+    renderMaps();
     renderHistory();
 
-    // PWA: ثبت سرویس‌ورکر فقط روی http/https
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }

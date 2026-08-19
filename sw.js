@@ -1,8 +1,9 @@
-const CACHE = 'pelakyab-v2';
+const CACHE = 'pelakyab-v3';
 const ASSETS = [
   './',
   './index.html',
   './data.js',
+  './map.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

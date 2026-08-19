@@ -1,7 +1,7 @@
 {
   "name": "پلاک‌یاب هوشمند",
   "short_name": "پلاک‌یاب",
-  "description": "تشخیص استان، شهر و نوع پلاک خودرو، موتورسیکلت و کد ملی",
+  "description": "تشخیص استان، شهر و نوع پلاک خودرو، موتورسیکلت، کد ملی، کد پستی، کارت بانکی، شبا، موبایل و تلفن ثابت",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b1120",
-  "theme_color": "#0f172a",
+  "theme_color": "#0b1120",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
