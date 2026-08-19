@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="پلاک‌یاب">
+  <meta name="description" content="تشخیص استان، شهر و نوع پلاک خودرو، موتورسیکلت و کد ملی">
+  <title>پلاک‌یاب هوشمند</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-180.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1120; --bg-card: #131c31; --bg-input: #1a243a; --border: #2a3655;
+      --text: #e2e8f0; --text-muted: #94a3b8; --primary: #38bdf8;
+      --success: #34d399; --warning: #fbbf24; --danger: #f87171; --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Vazirmatn', Tahoma, system-ui, sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 20% 0%, rgba(56,189,248,0.08) 0%, transparent 50%);
+      min-height: 100vh; min-height: 100dvh; padding: 16px 14px 40px;
+      color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 460px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 16px; }
+    .logo {
+      width: 56px; height: 56px; background: linear-gradient(135deg,#0ea5e9,#38bdf8);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; margin: 0 auto 10px; box-shadow: 0 6px 20px rgba(14,165,233,0.3);
+    }
+    header h1 { font-size: 1.3rem; font-weight: 700; }
+    header p { font-size: 0.8rem; color: var(--text-muted); }
+
+    .tabs {
+      display: flex; gap: 6px; margin-bottom: 16px;
+      background: var(--bg-card); border-radius: 12px; padding: 5px; border: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1; text-align: center; padding: 10px 4px; border-radius: 9px;
+      font-size: 0.88rem; font-weight: 600; cursor: pointer; color: var(--text-muted);
+      transition: all 0.2s; border: none; background: transparent; font-family: inherit;
+    }
+    .tab.active { background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: #0f172a; box-shadow: 0 3px 10px rgba(14,165,233,0.3); }
+
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+    }
+    .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .card-title small { color: var(--text-muted); font-weight: 400; font-size: 0.72rem; }
+
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 7px; color: var(--text-muted); }
+    select, input {
+      width: 100%; padding: 12px 14px; font-size: 1rem; border: 1.5px solid var(--border);
+      border-radius: 10px; background: var(--bg-input); color: var(--text);
+      font-family: inherit; direction: rtl; appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: left 12px center; padding-left: 32px;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
+    input::placeholder { color: #64748b; }
+    .input-group { display: flex; gap: 10px; }
+    .input-group > div { flex: 1; }
+    .mode-hint { font-size: 0.76rem; color: var(--text-muted); margin: 8px 0 12px; }
+    .btn {
+      width: 100%; padding: 13px; font-size: 1rem; font-weight: 600; border: none; border-radius: 10px;
+      background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: #0f172a; cursor: pointer;
+      margin-top: 10px; font-family: inherit; box-shadow: 0 4px 12px rgba(14,165,233,0.3);
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .result-box { display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; animation: fadeUp 0.3s ease; }
+    .result-box.show { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .result-box::before { content:''; position:absolute; top:0; right:0; bottom:0; width:4px; }
+    .result-box.success::before { background: var(--success); }
+    .result-box.warning::before { background: var(--warning); }
+    .result-box.danger::before { background: var(--danger); }
+    .result-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .result-detail { font-size: 0.92rem; margin-bottom: 4px; }
+    .result-detail span { color: var(--text-muted); font-size: 0.82rem; }
+    .result-note {
+      font-size: 0.78rem; color: var(--text-muted); background: var(--bg-input);
+      padding: 9px 12px; border-radius: 8px; margin-top: 10px; line-height: 1.6;
+    }
+
+    .type-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.74rem;
+      font-weight: 700; margin-inline-start: 6px; vertical-align: middle;
+      background: #1a243a; border: 1px solid var(--border);
+    }
+    .type-badge.personal { color: #0f172a; background: #f1f5f9; border-color: #cbd5e1; }
+    .type-badge.taxi, .type-badge.public, .type-badge.agri { color: #0f172a; background: #fde047; border-color: #eab308; }
+    .type-badge.gov, .type-badge.protocol { color: #fff; background: #dc2626; border-color: #991b1b; }
+    .type-badge.military { color: #fff; background: #16a34a; border-color: #15803d; }
+    .type-badge.military2 { color: #0f172a; background: #d6d3d1; border-color: #a8a29e; }
+    .type-badge.diplomatic { color: #fff; background: #6366f1; border-color: #4338ca; }
+
+    .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .actions button {
+      flex: 1; padding: 9px; font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg-input); color: var(--text); font-family: inherit; cursor: pointer;
+    }
+    .actions button:active { transform: scale(0.97); }
+
+    /* plate diagram */
+    .plate {
+      display: flex; direction: ltr; align-items: stretch; gap: 6px;
+      background: #fff; border-radius: 8px; padding: 7px 8px; margin: 12px 0;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.35);
+    }
+    .plate .band {
+      background: linear-gradient(180deg,#2396f3,#0b4da2); color: #fff; border-radius: 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 0.5rem; font-weight: 700; padding: 2px 6px; min-width: 34px;
+    }
+    .plate .band .flag { font-size: 0.9rem; }
+    .plate .seg {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 2px;
+      font-size: 1.15rem; font-weight: 800; color: #0f172a; min-width: 30px;
+    }
+    .plate .seg.box { background: #f1f5f9; min-width: 40px; }
+    .plate.taxi, .plate.public, .plate.agri { background: #fde047; }
+    .plate.gov, .plate.protocol { background: #dc2626; }
+    .plate.gov .seg, .plate.protocol .seg { color: #fff; border-color: #991b1b; }
+    .plate.gov .band, .plate.protocol .band { background: linear-gradient(180deg,#7f1d1d,#450a0a); }
+    .plate.military { background: #16a34a; }
+    .plate.military .seg { color: #fff; border-color: #15803d; }
+    .plate.military2 { background: #d6d3d1; }
+    .plate.diplomatic { border: 2px solid #6366f1; }
+
+    /* reverse lookup chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      background: var(--bg-input); border: 1px solid var(--border); border-radius: 9px;
+      padding: 7px 12px; font-size: 0.82rem; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+    }
+    .chip b { color: #7dd3fc; font-size: 1rem; }
+    .chip span { color: var(--text-muted); font-size: 0.68rem; }
+    .chip:active { transform: scale(0.96); }
+
+    .letter-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .letter-cell {
+      background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px;
+      padding: 4px 9px; font-size: 0.78rem; cursor: default;
+    }
+    .letter-cell b { color: #7dd3fc; }
+    .letter-cell span { color: var(--text-muted); font-size: 0.66rem; }
+
+    /* history */
+    .hist-empty { font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 8px; }
+    .hist-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 6px; cursor: pointer;
+      border-bottom: 1px dashed var(--border); font-size: 0.86rem;
+    }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:active { background: var(--bg-input); }
+    .hist-item .h-icon { font-size: 1.1rem; }
+    .hist-item .h-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-item .h-time { font-size: 0.66rem; color: var(--text-muted); }
+    .hist-clear { width: 100%; margin-top: 8px; padding: 8px; font-size: 0.78rem; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-family: inherit; }
+
+    .guide-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .guide-header h2 { font-size: 0.96rem; font-weight: 600; }
+    .guide-toggle { color: var(--primary); font-size: 1.1rem; transition: transform 0.2s; }
+    .guide-toggle.open { transform: rotate(180deg); }
+    .guide-content { display: none; margin-top: 12px; max-height: 55vh; overflow-y: auto; padding-inline-start: 2px; }
+    .guide-content.open { display: block; }
+    .province-group { margin-bottom: 12px; }
+    .province-name {
+      font-size: 0.88rem; font-weight: 700; color: var(--primary);
+      margin-bottom: 5px; padding-bottom: 3px; border-bottom: 1px solid var(--border);
+    }
+    .code-row { display: flex; gap: 8px; padding: 4px 0; font-size: 0.84rem; flex-wrap: wrap; align-items: baseline; }
+    .code-num { font-weight: 700; color: #7dd3fc; min-width: 38px; flex-shrink: 0; }
+    .code-info { color: var(--text-muted); }
+    .code-info strong { color: var(--text); font-weight: 500; }
+
+    table.types { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    table.types th, table.types td { border: 1px solid var(--border); padding: 6px 8px; text-align: right; }
+    table.types th { color: var(--text-muted); font-size: 0.76rem; background: var(--bg-input); }
+    .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-inline-end: 6px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.2); }
+
+    .hidden { display: none !important; }
+    footer { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 24px; opacity: 0.65; line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">🔍</div>
+      <h1>پلاک‌یاب هوشمند</h1>
+      <p>تشخیص استان، شهر، نوع پلاک و کد ملی</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" id="tabPlate" onclick="switchTab('plate')">پلاک خودرو</button>
+      <button class="tab" id="tabNational" onclick="switchTab('national')">کد ملی</button>
+      <button class="tab" id="tabMotor" onclick="switchTab('motor')">موتورسیکلت</button>
+    </div>
+
+    <!-- ============ پلاک خودرو ============ -->
+    <div id="panelPlate">
+      <div class="card">
+        <label for="mode">حالت ورودی</label>
+        <select id="mode" onchange="updateMode()">
+          <option value="code" selected>فقط دو رقم (زیر کلمه ایران)</option>
+          <option value="codeLetter">دو رقم + حرف</option>
+          <option value="full">پلاک کامل</option>
+        </select>
+        <p class="mode-hint" id="modeHint">فقط کد دو رقمی زیر کلمه ایران را وارد کنید</p>
+
+        <div id="modeCode">
+          <label for="codeInput">کد دو رقمی</label>
+          <input type="text" id="codeInput" inputmode="numeric" maxlength="2" placeholder="مثال: ۷۲" autocomplete="off">
+        </div>
+        <div id="modeCodeLetter" class="hidden">
+          <div class="input-group">
+            <div>
+              <label for="codeInput2">کد دو رقمی</label>
+              <input type="text" id="codeInput2" inputmode="numeric" maxlength="2" placeholder="۷۲" autocomplete="off">
+            </div>
+            <div>
+              <label for="letterInput">حرف</label>
+              <input type="text" id="letterInput" maxlength="1" placeholder="ج" autocomplete="off">
+            </div>
+          </div>
+          <p class="mode-hint">مثال: ۷۲ ج = بابل</p>
+        </div>
+        <div id="modeFull" class="hidden">
+          <label for="fullInput">پلاک کامل</label>
+          <input type="text" id="fullInput" placeholder="مثال: ۱۲ ب ۳۴۵ - ۹۱" autocomplete="off">
+        </div>
+        <button class="btn" onclick="lookupPlate()">جستجو</button>
+      </div>
+
+      <div class="result-box" id="resultBoxPlate">
+        <div class="result-title" id="resultTitlePlate"></div>
+        <div id="plateDiagram"></div>
+        <div class="result-detail" id="resultProvincePlate"></div>
+        <div class="result-detail" id="resultCityPlate"></div>
+        <div class="result-detail" id="resultTypePlate"></div>
+        <div class="result-note" id="resultNotePlate"></div>
+        <div class="actions">
+          <button onclick="shareResult('plate','whatsapp')">واتساپ</button>
+          <button onclick="shareResult('plate','telegram')">تلگرام</button>
+          <button onclick="copyResult('plate')">کپی</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔄 جستجوی معکوس <small>انتخاب استان و دیدن کدها</small></div>
+        <select id="revProvince" onchange="reverseLookup()"><option value="">انتخاب استان…</option></select>
+        <div id="revResult"></div>
+      </div>
+
+      <div class="card" id="historyCardPlate">
+        <div class="card-title">🕓 تاریخچه اخیر</div>
+        <div id="historyPlate"></div>
+      </div>
+
+      <div class="card">
+        <div class="guide-header" onclick="toggleGuide('plate')">
+          <h2>📖 راهنمای کد پلاک استان‌ها</h2>
+          <span class="guide-toggle" id="guideTogglePlate">▼</span>
+        </div>
+        <div class="guide-content" id="guideContentPlate"></div>
+      </div>
+
+      <div class="card">
+        <div class="guide-header" onclick="toggleGuide('types')">
+          <h2>🏷️ انواع پلاک بر اساس حرف</h2>
+          <span class="guide-toggle" id="guideToggleTypes">▼</span>
+        </div>
+        <div class="guide-content" id="guideContentTypes"></div>
+      </div>
+    </div>
+
+    <!-- ============ کد ملی ============ -->
+    <div id="panelNational" class="hidden">
+      <div class="card">
+        <label for="nationalInput">سه رقم اول کد ملی (یا کل کد ملی)</label>
+        <input type="text" id="nationalInput" inputmode="numeric" maxlength="10" placeholder="مثال: ۲۰۸ یا ۲۰۸۱۲۳۴۵۶۷" autocomplete="off">
+        <p class="mode-hint">سه رقم اول کد ملی محل صدور شناسنامه را نشان می‌دهد</p>
+        <button class="btn" onclick="lookupNational()">جستجو</button>
+      </div>
+
+      <div class="result-box" id="resultBoxNational">
+        <div class="result-title" id="resultTitleNational"></div>
+        <div class="result-detail" id="resultProvinceNational"></div>
+        <div class="result-detail" id="resultCityNational"></div>
+        <div class="result-note" id="resultNoteNational"></div>
+        <div class="actions">
+          <button onclick="shareResult('national','whatsapp')">واتساپ</button>
+          <button onclick="shareResult('national','telegram')">تلگرام</button>
+          <button onclick="copyResult('national')">کپی</button>
+        </div>
+      </div>
+
+      <div class="card" id="historyCardNational">
+        <div class="card-title">🕓 تاریخچه اخیر</div>
+        <div id="historyNational"></div>
+      </div>
+
+      <div class="card">
+        <div class="guide-header" onclick="toggleGuide('national')">
+          <h2>📖 راهنمای پیش‌شماره کد ملی</h2>
+          <span class="guide-toggle" id="guideToggleNational">▼</span>
+        </div>
+        <div class="guide-content" id="guideContentNational"></div>
+      </div>
+    </div>
+
+    <!-- ============ موتورسیکلت ============ -->
+    <div id="panelMotor" class="hidden">
+      <div class="card">
+        <label for="motorInput">کد سه رقمی پلاک موتور (قسمت بالا)</label>
+        <input type="text" id="motorInput" inputmode="numeric" maxlength="3" placeholder="مثال: ۵۸۶" autocomplete="off">
+        <p class="mode-hint">عدد سه رقمی بالای پلاک موتور نشان‌دهنده استان است</p>
+        <button class="btn" onclick="lookupMotor()">جستجو</button>
+      </div>
+
+      <div class="result-box" id="resultBoxMotor">
+        <div class="result-title" id="resultTitleMotor"></div>
+        <div class="result-detail" id="resultProvinceMotor"></div>
+        <div class="result-note" id="resultNoteMotor"></div>
+        <div class="actions">
+          <button onclick="shareResult('motor','whatsapp')">واتساپ</button>
+          <button onclick="shareResult('motor','telegram')">تلگرام</button>
+          <button onclick="copyResult('motor')">کپی</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="guide-header" onclick="toggleGuide('motor')">
+          <h2>📖 راهنمای کد موتورسیکلت</h2>
+          <span class="guide-toggle" id="guideToggleMotor">▼</span>
+        </div>
+        <div class="guide-content" id="guideContentMotor"></div>
+      </div>
+    </div>
+
+    <footer>
+      داده‌ها تقریبی و بر پایه منابع عمومی (ویکی‌پدیا، ثبت احوال) · نسخه ۲.۰
+    </footer>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    /* ============ ابزارهای کمکی ============ */
+    function toEn(str) {
+      if (!str) return '';
+      const m = {'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+      return String(str).replace(/[۰-۹٠-٩]/g, d => m[d] || d);
+    }
+    function toFa(str) {
+      if (str === undefined || str === null) return '';
+      const m = {'0':'۰','1':'۱','2':'۲','3':'۳','4':'۴','5':'۵','6':'۶','7':'۷','8':'۸','9':'۹'};
+      return String(str).replace(/[0-9]/g, d => m[d]);
+    }
+    const PERSIAN_LETTERS = 'آابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی';
+
+    /* ============ تب‌ها ============ */
+    function switchTab(tab) {
+      const panels = { plate: 'panelPlate', national: 'panelNational', motor: 'panelMotor' };
+      Object.keys(panels).forEach(k => document.getElementById(panels[k]).classList.toggle('hidden', k !== tab));
+      ['tabPlate','tabNational','tabMotor'].forEach(id => document.getElementById(id).classList.toggle('active', id === 'tab' + tab[0].toUpperCase() + tab.slice(1)));
+    }
+
+    /* ============ پلاک خودرو ============ */
+    function hideResult(type) {
+      const ids = { plate: 'resultBoxPlate', national: 'resultBoxNational', motor: 'resultBoxMotor' };
+      const el = document.getElementById(ids[type]);
+      if (el) el.classList.remove('show');
+    }
+
+    function updateMode() {
+      const mode = document.getElementById('mode').value;
+      document.getElementById('modeCode').classList.toggle('hidden', mode !== 'code');
+      document.getElementById('modeCodeLetter').classList.toggle('hidden', mode !== 'codeLetter');
+      document.getElementById('modeFull').classList.toggle('hidden', mode !== 'full');
+      const hints = { code: 'فقط کد دو رقمی زیر کلمه ایران را وارد کنید', codeLetter: 'کد + حرف وسط برای دقت بیشتر', full: 'کل پلاک را وارد کنید (مثلاً: ۱۲ ب ۳۴۵ - ۹۱)' };
+      document.getElementById('modeHint').textContent = hints[mode];
+      hideResult('plate');
+    }
+
+    const LETTER2TYPE = {
+      'ب':'شخصی','ج':'شخصی','د':'شخصی','س':'شخصی','ص':'شخصی','ط':'شخصی','ق':'شخصی','ل':'شخصی','م':'شخصی','ن':'شخصی','و':'شخصی','ه':'شخصی','ی':'شخصی',
+      'الف':'دولتی','ا':'دولتی','ت':'تاکسی','ع':'عمومی','ک':'کشاورزی','ژ':'جانباز و معلول','گ':'گذر موقت',
+      'پ':'نظامی','ث':'نظامی','ز':'نظامی','ش':'نظامی','ف':'نظامی'
+    };
+    const LETTER2TYPE_CLS = {
+      'شخصی':'personal','دولتی':'gov','تاکسی':'taxi','عمومی':'public','کشاورزی':'agri',
+      'جانباز و معلول':'personal','گذر موقت':'military2','نظامی':'military'
+    };
+    function plateTypeOf(letter, midLen) {
+      if (letter === 'D') return { label: 'دیپلماتیک', cls: 'diplomatic' };
+      if (letter === 'S') return { label: 'سرویس سفارت', cls: 'diplomatic' };
+      if ((letter === 'الف' || letter === 'ا') && midLen === 4) return { label: 'تشریفات دولتی (PROTOCOL)', cls: 'protocol' };
+      const t = LETTER2TYPE[letter];
+      if (!t) return null;
+      return { label: t, cls: LETTER2TYPE_CLS[t] };
+    }
+
+    function parseFullPlate(raw) {
+      const s = toEn(raw).replace(/[\s\-–_/]/g, '');
+      if (!s) return { error: 'ورودی خالی است.' };
+      // فرمت: دو رقم + حرف + سه(یا چهار) رقم + دو رقم
+      const m = s.match(/^(\d{2})([A-Za-z\u0600-\u06FF]{1})(\d{3,4})(\d{2})$/);
+      if (!m) return { error: 'فرمت پلاک کامل را اشتباه وارد کرده‌اید.\nفرمت درست: ۱۲ ب ۳۴۵ - ۹۱' };
+      return { code: m[1], letter: m[2], mid: m[3], code2: m[4] };
+    }
+
+    function lookupPlate() {
+      const mode = document.getElementById('mode').value;
+      let code = '', letter = '', mid = '', code2 = '';
+      if (mode === 'code') {
+        code = toEn(document.getElementById('codeInput').value.trim());
+      } else if (mode === 'codeLetter') {
+        code = toEn(document.getElementById('codeInput2').value.trim());
+        letter = document.getElementById('letterInput').value.trim();
+      } else {
+        const p = parseFullPlate(document.getElementById('fullInput').value);
+        if (p.error) { showPlateResult(null, null, { error: p.error }); return; }
+        code = p.code; letter = p.letter; mid = p.mid; code2 = p.code2;
+      }
+      if (!/^\d{2}$/.test(code)) code = (code.length === 1 ? '0' + code : code);
+      showPlateResult(code, letter, { mid, code2 });
+    }
+
+    function cityList(city) {
+      if (Array.isArray(city)) return city;
+      return [city];
+    }
+    function citiesProvince(letter, code) {
+      // استان‌های مرتبط با شهر(های) یک حرف
+      const cityToProv = CITY_PROV || {};
+      const provs = new Set();
+      const letters = LETTERS[code];
+      if (letters && letters[letter]) {
+        cityList(letters[letter]).forEach(c => {
+          const p = cityToProv[c];
+          if (p) provs.add(p);
+        });
+      }
+      return [...provs];
+    }
+
+    function showPlateResult(code, letter, opts) {
+      opts = opts || {};
+      const box = document.getElementById('resultBoxPlate');
+      const title = document.getElementById('resultTitlePlate');
+      const provEl = document.getElementById('resultProvincePlate');
+      const cityEl = document.getElementById('resultCityPlate');
+      const typeEl = document.getElementById('resultTypePlate');
+      const noteEl = document.getElementById('resultNotePlate');
+      const diagramEl = document.getElementById('plateDiagram');
+      document.getElementById('resultBoxPlate').classList.add('show');
+
+      if (opts.error || !/^\d{2}$/.test(code)) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ ورودی نامعتبر';
+        provEl.textContent = ''; cityEl.textContent = ''; typeEl.textContent = ''; diagramEl.innerHTML = '';
+        noteEl.textContent = opts.error || 'کد دو رقمی معتبر وارد کنید.';
+        return;
+      }
+
+      const d = PLATE_DATA[code];
+      if (!d) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ قابل شناسایی نیست';
+        provEl.textContent = `کد ${toFa(code)} یافت نشد.`;
+        cityEl.textContent = ''; typeEl.textContent = ''; diagramEl.innerHTML = '';
+        noteEl.textContent = 'ممکن است کد جدید یا مربوط به خودروهای خاص باشد.';
+        return;
+      }
+
+      let province = d.province, cities = d.cities.slice(), note = d.note || '';
+      let detail = '';
+      let letterResolved = false;
+
+      if (letter) {
+        const lmap = LETTERS[code];
+        if (lmap && lmap[letter]) {
+          const cl = cityList(lmap[letter]);
+          detail = 'حرف «' + letter + '» → ' + cl.join('، ');
+          const provs = citiesProvince(letter, code);
+          if (provs.length === 1) province = provs[0];
+          else if (provs.length > 1) province = provs.join(' / ');
+          cities = cl;
+          letterResolved = true;
+        }
+      }
+
+      const shared = province.includes('/');
+      box.className = 'result-box ' + (shared ? 'warning show' : 'success show');
+
+      // نوع پلاک
+      let typeTxt = '';
+      if (opts.mid !== undefined) {
+        const t = plateTypeOf(letter || '', opts.mid.length);
+        if (t) typeTxt = `<span class="type-badge ${t.cls}">${t.label}</span>`;
+      } else if (letter && letterResolved === false) {
+        // حالت دو رقم + حرف بدون داده حرف
+        const t = plateTypeOf(letter, 3);
+        if (t) typeTxt = `<span class="type-badge ${t.cls}">${t.label}</span>`;
+      }
+
+      title.innerHTML = (shared ? '⚠️ کد مشترک' : '✅ شناسایی شد') + typeTxt;
+      provEl.innerHTML = `<span>استان:</span> ${province}`;
+      cityEl.innerHTML = `<span>منطقه:</span> ${cities.join('، ') || '—'}`;
+      typeEl.innerHTML = detail ? `<span>جزئیات حرف:</span> ${detail}` : '';
+
+      const extras = [];
+      if (d.note) extras.push(d.note);
+      if (opts.mid !== undefined) extras.push('کد سریال: ' + toFa(opts.mid));
+      if (letterResolved) extras.push('با حرف، منطقه دقیق‌تر شناسایی شد.');
+      noteEl.textContent = extras.join(' · ') || 'بر اساس سیستم پلاک‌گذاری ملی';
+
+      // دیاگرام پلاک
+      diagramEl.innerHTML = renderPlate(letter, code, opts);
+
+      window._lastPlate = { code, letter, mid: opts.mid, province, cities: cities.join('، '), note: noteEl.textContent, type: typeTxt.replace(/<[^>]+>/g,'') };
+      addHistory('plate', { code, letter, province, city: cities.join('، '), query: (letter ? code + ' ' + letter : code) });
+    }
+
+    function renderPlate(letter, code, opts) {
+      if (opts.mid === undefined || !letter) return '';
+      const t = plateTypeOf(letter, opts.mid.length);
+      let cls = 'plate';
+      if (t) {
+        if (t.cls === 'personal') cls = 'plate';
+        else if (t.cls === 'protocol') cls = 'plate protocol';
+        else if (t.cls === 'taxi') cls = 'plate taxi';
+        else if (t.cls === 'public') cls = 'plate public';
+        else if (t.cls === 'agri') cls = 'plate agri';
+        else if (t.cls === 'gov') cls = 'plate gov';
+        else if (t.cls === 'military') cls = 'plate military';
+        else if (t.cls === 'military2') cls = 'plate military2';
+        else cls = 'plate';
+      }
+      return `<div class="${cls}">
+        <div class="band"><span class="flag">🇮🇷</span><span>IRAN</span></div>
+        <div class="seg">${toFa(code)}</div>
+        <div class="seg">${letter === 'الف' ? 'ا' : letter}</div>
+        <div class="seg">${toFa(opts.mid)}</div>
+        <div class="seg box">${toFa(opts.code2 || '')}</div>
+      </div>`;
+    }
+
+    /* ============ جستجوی معکوس ============ */
+    function buildReverseOptions() {
+      const sel = document.getElementById('revProvince');
+      const provs = [...new Set(Object.values(PLATE_DATA).map(d => d.province))].sort();
+      sel.innerHTML = '<option value="">انتخاب استان…</option>' + provs
+        .filter(p => p !== 'ذخیره')
+        .map(p => `<option value="${p}">${p}</option>`).join('');
+    }
+    function reverseLookup() {
+      const sel = document.getElementById('revProvince');
+      const box = document.getElementById('revResult');
+      const p = sel.value;
+      if (!p) { box.innerHTML = ''; return; }
+      const codes = Object.keys(PLATE_DATA).filter(c => PLATE_DATA[c].province === p).sort((a, b) => a - b);
+      if (!codes.length) { box.innerHTML = '<p class="hist-empty">کدی یافت نشد.</p>'; return; }
+      let html = '<div class="chips">';
+      codes.forEach(c => {
+        const cities = PLATE_DATA[c].cities;
+        html += `<div class="chip" onclick="quickLookup('${c}')"><b>${toFa(c)}</b><span>${cities.join('، ') || '—'}</span></div>`;
+      });
+      html += '</div>';
+      // جزئیات حروف
+      const letterBlocks = [];
+      codes.forEach(c => {
+        const lm = LETTERS[c];
+        if (!lm) return;
+        const cells = Object.keys(lm).map(l => `<div class="letter-cell"><b>${l}</b> <span>${cityList(lm[l]).join('، ')}</span></div>`).join('');
+        if (cells) letterBlocks.push(`<div class="letter-row" style="margin-top:8px"><span style="color:var(--text-muted);font-size:.74rem;width:100%">کد ${toFa(c)}:</span>${cells}</div>`);
+      });
+      box.innerHTML = html + (letterBlocks.length ? '<div style="margin-top:6px">' + letterBlocks.join('') + '</div>' : '');
+    }
+    function quickLookup(code) {
+      document.getElementById('mode').value = 'code';
+      updateMode();
+      document.getElementById('codeInput').value = code;
+      lookupPlate();
+      document.getElementById('panelPlate').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ============ کد ملی ============ */
+    function lookupNational() {
+      let val = toEn(document.getElementById('nationalInput').value.trim()).replace(/\D/g, '');
+      if (val.length < 3) {
+        showNationalResult(null, null, 'لطفاً حداقل سه رقم اول کد ملی را وارد کنید.');
+        return;
+      }
+      const prefix = val.slice(0, 3);
+      const entry = NATIONAL_DATA[prefix];
+      let province = '', city = '';
+      if (entry) {
+        const parts = entry.split(' / ');
+        province = parts[0]; city = parts[1] || '';
+      }
+      showNationalResult(entry ? { province, city } : null, prefix, null);
+    }
+    function showNationalResult(data, prefix, errMsg) {
+      const box = document.getElementById('resultBoxNational');
+      const title = document.getElementById('resultTitleNational');
+      const prov = document.getElementById('resultProvinceNational');
+      const city = document.getElementById('resultCityNational');
+      const note = document.getElementById('resultNoteNational');
+      box.classList.add('show');
+      if (errMsg) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ خطا'; prov.textContent = errMsg; city.textContent = ''; note.textContent = '';
+        return;
+      }
+      if (!data) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ قابل شناسایی نیست';
+        prov.textContent = `پیش‌شماره ${toFa(prefix)} در داده‌های فعلی یافت نشد.`;
+        city.textContent = '';
+        note.textContent = 'ممکن است مربوط به شهرستان کوچک‌تر، صادره خارج از کشور یا داده‌های کامل‌تر باشد.';
+        return;
+      }
+      box.className = 'result-box success show';
+      title.textContent = '✅ شناسایی شد';
+      prov.innerHTML = `<span>استان:</span> ${data.province}`;
+      city.innerHTML = `<span>شهر / محل صدور:</span> ${data.city || '—'}`;
+      note.textContent = `سه رقم اول کد ملی: ${toFa(prefix)} · محل صدور شناسنامه`;
+      window._lastNational = { prefix, province: data.province, city: data.city };
+      addHistory('national', { prefix, province: data.province, city: data.city, query: prefix });
+    }
+
+    /* ============ موتورسیکلت ============ */
+    function lookupMotor() {
+      let val = toEn(document.getElementById('motorInput').value.trim()).replace(/\D/g, '');
+      const box = document.getElementById('resultBoxMotor');
+      const title = document.getElementById('resultTitleMotor');
+      const prov = document.getElementById('resultProvinceMotor');
+      const note = document.getElementById('resultNoteMotor');
+      box.classList.add('show');
+      if (!/^\d{3}$/.test(val)) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ ورودی نامعتبر';
+        prov.textContent = 'کد سه رقمی معتبر وارد کنید.';
+        note.textContent = '';
+        return;
+      }
+      const n = parseInt(val, 10);
+      let found = null;
+      for (const m of MOTOR_DATA) {
+        if (m.codes.includes(n)) { found = m.p; break; }
+      }
+      if (!found) {
+        box.className = 'result-box danger show';
+        title.textContent = '❌ قابل شناسایی نیست';
+        prov.textContent = `کد ${toFa(val)} در داده‌های فعلی یافت نشد.`;
+        note.textContent = '';
+        return;
+      }
+      box.className = 'result-box success show';
+      title.textContent = '✅ شناسایی شد';
+      prov.innerHTML = `<span>استان:</span> ${found}`;
+      note.textContent = `کد ${toFa(val)} → ${found}`;
+      window._lastMotor = { code: val, province: found };
+      addHistory('motor', { code: val, province: found, query: val });
+    }
+
+    /* ============ تاریخچه ============ */
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem('pelakyab_history') || '[]'); } catch (e) { return []; }
+    }
+    function saveHistory(h) {
+      try { localStorage.setItem('pelakyab_history', JSON.stringify(h.slice(0, 10))); } catch (e) {}
+    }
+    function addHistory(type, item) {
+      const h = getHistory();
+      const rec = { type, ...item, t: Date.now() };
+      h.unshift(rec);
+      saveHistory(h);
+      renderHistory();
+    }
+    function renderHistory() {
+      const h = getHistory();
+      const plateBox = document.getElementById('historyPlate');
+      const natBox = document.getElementById('historyNational');
+      const plateItems = h.filter(x => x.type === 'plate');
+      const natItems = h.filter(x => x.type === 'national' || x.type === 'motor');
+      const fmt = ts => {
+        const d = new Date(ts);
+        return d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+      };
+      const render = (items, type) => {
+        if (!items.length) return '<p class="hist-empty">هنوز جستجویی ثبت نشده.</p>';
+        return items.map(x => {
+          let icon = '🚗', text = '';
+          if (type === 'plate') { icon = '🚗'; text = `کد ${toFa(x.query)} → ${x.province}${x.city ? ' / ' + x.city : ''}`; }
+          else if (x.type === 'national') { icon = '🪪'; text = `کد ملی ${toFa(x.query)} → ${x.province}${x.city ? ' / ' + x.city : ''}`; }
+          else { icon = '🏍️'; text = `کد موتور ${toFa(x.query)} → ${x.province}`; }
+          return `<div class="hist-item" onclick="replayHistory('${type}','${x.query}')"><span class="h-icon">${icon}</span><span class="h-text">${text}</span><span class="h-time">${fmt(x.t)}</span></div>`;
+        }).join('') + `<button class="hist-clear" onclick="clearHistory()">پاک کردن تاریخچه</button>`;
+      };
+      plateBox.innerHTML = render(plateItems, 'plate');
+      natBox.innerHTML = render(natItems, 'national');
+    }
+    function replayHistory(type, query) {
+      if (type === 'plate') {
+        switchTab('plate');
+        document.getElementById('mode').value = 'code';
+        updateMode();
+        document.getElementById('codeInput').value = query;
+        lookupPlate();
+      } else if (type === 'national') {
+        switchTab('national');
+        document.getElementById('nationalInput').value = query;
+        lookupNational();
+      }
+    }
+    function clearHistory() {
+      localStorage.removeItem('pelakyab_history');
+      renderHistory();
+    }
+
+    /* ============ اشتراک ============ */
+    function copyResult(type) {
+      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : 'Motor')];
+      if (!r) return;
+      let text = '';
+      if (type === 'plate') text = `پلاک‌یاب\nکد ${toFa(r.code)}${r.letter ? ' حرف ' + r.letter : ''}\nاستان: ${r.province}\nمنطقه: ${r.cities}`;
+      else if (type === 'national') text = `پلاک‌یاب\nکد ملی ${toFa(r.prefix)}\nاستان: ${r.province}\nشهر: ${r.city}`;
+      else text = `پلاک‌یاب\nموتور ${toFa(r.code)} → ${r.province}`;
+      const done = () => {
+        try { navigator.clipboard.writeText(text).then(() => alert('کپی شد ✓')); } catch (e) {}
+      };
+      if (navigator.clipboard) done(); else { alert(text); }
+    }
+    function shareResult(type, channel) {
+      const r = window['_last' + (type === 'plate' ? 'Plate' : type === 'national' ? 'National' : 'Motor')];
+      if (!r) return;
+      let text = '';
+      if (type === 'plate') text = `پلاک ${toFa(r.code)}${r.letter ? ' (حرف ' + r.letter + ')' : ''} متعلق به ${r.province} است.${r.cities ? ' منطقه: ' + r.cities : ''}`;
+      else if (type === 'national') text = `کد ملی ${toFa(r.prefix)} → ${r.province}${r.city ? ' / ' + r.city : ''}`;
+      else text = `کد موتور ${toFa(r.code)} → ${r.province}`;
+      const full = `پلاک‌یاب هوشمند 🔍\n${text}`;
+      const enc = encodeURIComponent(full);
+      if (channel === 'whatsapp') window.open('https://wa.me/?text=' + enc, '_blank');
+      else if (channel === 'telegram') window.open('https://t.me/share/url?url=' + encodeURIComponent(location.href) + '&text=' + enc, '_blank');
+    }
+
+    /* ============ راهنماها ============ */
+    function toggleGuide(which) {
+      const map = { plate: 'guideContentPlate', national: 'guideContentNational', motor: 'guideContentMotor', types: 'guideContentTypes' };
+      const tog = { plate: 'guideTogglePlate', national: 'guideToggleNational', motor: 'guideToggleMotor', types: 'guideToggleTypes' };
+      const content = document.getElementById(map[which]);
+      const toggle = document.getElementById(tog[which]);
+      content.classList.toggle('open');
+      toggle.classList.toggle('open');
+      toggle.textContent = content.classList.contains('open') ? '▲' : '▼';
+    }
+
+    function buildGuides() {
+      // راهنمای پلاک: استان → کدها
+      const provs = {};
+      Object.keys(PLATE_DATA).sort((a, b) => a - b).forEach(c => {
+        const d = PLATE_DATA[c];
+        (provs[d.province] = provs[d.province] || []).push(c);
+      });
+      let html = '';
+      Object.keys(provs).sort().forEach(p => {
+        const codes = provs[p];
+        html += `<div class="province-group"><div class="province-name">${p}</div>`;
+        codes.forEach(c => {
+          const cities = PLATE_DATA[c].cities;
+          html += `<div class="code-row"><span class="code-num">${toFa(c)}</span><span class="code-info">${cities.join('، ') || PLATE_DATA[c].note || '—'}</span></div>`;
+        });
+        html += '</div>';
+      });
+      document.getElementById('guideContentPlate').innerHTML = html;
+
+      // راهنمای کد ملی
+      const natProvs = {};
+      Object.keys(NATIONAL_DATA).sort().forEach(k => {
+        const parts = NATIONAL_DATA[k].split(' / ');
+        (natProvs[parts[0]] = natProvs[parts[0]] || []).push(k);
+      });
+      html = '';
+      Object.keys(natProvs).sort().forEach(p => {
+        html += `<div class="province-group"><div class="province-name">${p}</div>`;
+        html += `<div class="code-row"><span class="code-info">پیش‌شماره‌ها: ${natProvs[p].map(toFa).join('، ')}</span></div>`;
+        html += '</div>';
+      });
+      document.getElementById('guideContentNational').innerHTML = html;
+
+      // راهنمای موتور
+      html = '';
+      MOTOR_DATA.forEach(m => {
+        const first = m.codes[0], last = m.codes[m.codes.length - 1];
+        const ranges = compressRanges(m.codes);
+        html += `<div class="code-row"><span class="code-num">${toFa(first)}</span><span class="code-info"><strong>${m.p}</strong> — ${ranges}</span></div>`;
+      });
+      document.getElementById('guideContentMotor').innerHTML = '<div class="province-group">' + html + '</div>';
+
+      // راهنمای انواع پلاک
+      const types = [
+        ['ب، ج، د، س، ص، ط، ق، ل، م، ن، و، ه، ی', 'خودروی شخصی', '#f1f5f9', 'personal'],
+        ['الف', 'دولتی', '#dc2626', 'gov'],
+        ['ت', 'تاکسی', '#fde047', 'taxi'],
+        ['ع', 'عمومی (اتوبوس، کامیون، وانت‌بار)', '#fde047', 'public'],
+        ['ک', 'کشاورزی (تراکتور و…)', '#fde047', 'agri'],
+        ['ژ', 'جانباز و معلول (نماد ویلچر)', '#f1f5f9', 'personal'],
+        ['گ', 'گذر موقت', '#d6d3d1', 'military2'],
+        ['پ', 'پلیس', '#16a34a', 'military'],
+        ['ث', 'سپاه پاسداران', '#16a34a', 'military'],
+        ['ز', 'وزارت دفاع', '#2563eb', 'military'],
+        ['ش', 'ارتش', '#d6d3d1', 'military2'],
+        ['ف', 'ستاد کل نیروهای مسلح', '#2563eb', 'military'],
+        ['D', 'دیپلمات سفارت‌خانه', '#6366f1', 'diplomatic'],
+        ['S', 'سرویس سفارت‌خانه', '#6366f1', 'diplomatic']
+      ];
+      html = `<table class="types"><tr><th>حرف</th><th>نوع پلاک</th><th>رنگ</th></tr>` +
+        types.map(t => `<tr><td><b>${t[0]}</b></td><td>${t[1]}</td><td><span class="swatch" style="background:${t[2]}"></span></td></tr>`).join('') +
+        '</table>';
+      document.getElementById('guideContentTypes').innerHTML = html;
+    }
+
+    function compressRanges(nums) {
+      const sorted = [...nums].sort((a, b) => a - b);
+      const out = [];
+      let start = sorted[0], prev = sorted[0];
+      for (let i = 1; i <= sorted.length; i++) {
+        const cur = sorted[i];
+        if (cur === prev + 1) { prev = cur; continue; }
+        out.push(start === prev ? toFa(start) : toFa(start) + '-' + toFa(prev));
+        start = prev = cur;
+      }
+      return out.join('، ');
+    }
+
+    /* ============ رویدادها و شروع ============ */
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (!document.getElementById('panelPlate').classList.contains('hidden')) lookupPlate();
+      else if (!document.getElementById('panelNational').classList.contains('hidden')) lookupNational();
+      else lookupMotor();
+    });
+
+    buildReverseOptions();
+    buildGuides();
+    renderHistory();
+
+    // PWA: ثبت سرویس‌ورکر فقط روی http/https
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
